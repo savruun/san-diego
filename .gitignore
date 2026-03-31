@@ -6,4 +6,6 @@
 /*.rbxl.lock
 
 Packages/
+out/
+ServerPackages/
 sourcemap.json
