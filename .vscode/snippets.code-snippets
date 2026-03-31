@@ -1,0 +1,54 @@
+{
+  "Quill Provider": {
+    "prefix": [
+      "provider",
+      "prvd"
+    ],
+    "description": "Create a Quill Provider.",
+    "body": [
+      "local ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g} = {}",
+      "",
+      "function ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}.start(self: self)",
+      "",
+      "end",
+      "",
+      "export type self = typeof(${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g})",
+      "return ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}"
+    ]
+  },
+  "Conch Command": {
+    "prefix": [
+      "command",
+      "cmd"
+    ],
+    "description": "Create a Conch Command.",
+    "body": [
+      "local conch = require('@packages/conch')",
+      "",
+      "local ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}_command = conch.register('${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}', {",
+      "\tdescription = 'Description of the command',",
+      "\tpermissions = { 'permission_name' },",
+      "",
+      "\targuments = function() end,",
+      "\tcallback = function() end",
+      "})",
+      "",
+      "return ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}_command"
+    ]
+  },
+  "React Component": {
+    "prefix": [
+      "component",
+      "cmp"
+    ],
+    "description": "Create a React Component.",
+    "body": [
+      "local react = require('@packages/react')",
+      "local e = react.createElement",
+      "",
+      "local function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}() end",
+      "",
+      "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}"
+    ]
+  }
+}
