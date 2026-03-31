@@ -3,6 +3,46 @@
 registry = "test"
 
 [[package]]
+name = "alicesaidhi/conch"
+version = "0.3.1"
+dependencies = [["language", "alicesaidhi/conch-language@0.3.1"]]
+
+[[package]]
+name = "alicesaidhi/conch-language"
+version = "0.3.1"
+dependencies = []
+
+[[package]]
+name = "alicesaidhi/conch-ui"
+version = "0.3.1"
+dependencies = [["conch", "alicesaidhi/conch@0.3.1"], ["language", "alicesaidhi/conch-language@0.3.1"], ["vide", "centau/vide@0.3.1"]]
+
+[[package]]
+name = "centau/vide"
+version = "0.3.1"
+dependencies = []
+
+[[package]]
+name = "featherfall-org/quill-core"
+version = "0.1.0-alpha.2"
+dependencies = []
+
+[[package]]
+name = "featherfall-org/quill-logger"
+version = "0.1.0-alpha.2"
+dependencies = []
+
+[[package]]
+name = "featherfall-org/quill-rblx-components"
+version = "0.1.0-alpha.2"
+dependencies = [["core", "featherfall-org/quill-core@0.1.0-alpha.2"]]
+
+[[package]]
+name = "featherfall-org/quill-rblx-lifecycles"
+version = "0.1.0-alpha.1"
+dependencies = [["core", "featherfall-org/quill-core@0.1.0-alpha.2"]]
+
+[[package]]
 name = "jsdotlua/boolean"
 version = "1.2.7"
 dependencies = [["number", "jsdotlua/number@1.2.7"]]
@@ -88,6 +128,16 @@ version = "1.2.7"
 dependencies = [["collections", "jsdotlua/collections@1.2.7"]]
 
 [[package]]
+name = "neonifieddev/signal"
+version = "0.0.3"
+dependencies = []
+
+[[package]]
+name = "pepeeltoro41/ui-labs"
+version = "2.4.2"
+dependencies = []
+
+[[package]]
 name = "rainb/quillobbygame"
 version = "0.1.0"
-dependencies = [["promise", "jsdotlua/promise@3.5.2"], ["react", "jsdotlua/react@17.2.1"], ["react-roblox", "jsdotlua/react-roblox@17.2.1"]]
+dependencies = [["conch", "alicesaidhi/conch@0.3.1"], ["conch_ui", "alicesaidhi/conch-ui@0.3.1"], ["promise", "jsdotlua/promise@3.5.2"], ["quill-core", "featherfall-org/quill-core@0.1.0-alpha.2"], ["quill-logger", "featherfall-org/quill-logger@0.1.0-alpha.2"], ["quill-rblx-components", "featherfall-org/quill-rblx-components@0.1.0-alpha.2"], ["quill-rblx-lifecycles", "featherfall-org/quill-rblx-lifecycles@0.1.0-alpha.1"], ["react", "jsdotlua/react@17.2.1"], ["react-roblox", "jsdotlua/react-roblox@17.2.1"], ["signal", "neonifieddev/signal@0.0.3"], ["ui-labs", "pepeeltoro41/ui-labs@2.4.2"]]
