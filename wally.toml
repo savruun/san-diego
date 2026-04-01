@@ -1,7 +1,7 @@
 [package]
-name = "rainb/quillobbygame"
+name = "savruun/sorcery"
 version = "0.1.0"
-registry = "https://github.com/UpliftGames/wally-index"
+registry = "https://github.com/savruun/SORCERY"
 realm = "shared"
 
 [dependencies]
