@@ -2,8 +2,8 @@
   "aliases": {
     "lune": "~/.lune/.typedefs/0.10.4/",
     "ext": "ext/",
-    "packages": "Packages/",
-    "spackages": "ServerPackages/",
+    "pkg": "Packages/",
+    "spkg": "ServerPackages/",
     "client": "src/client/",
     "server": "src/server/",
     "shared": "src/shared/"
