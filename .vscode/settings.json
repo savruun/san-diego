@@ -9,5 +9,10 @@
     "editor.tabSize": 2,
     "luau-lsp.sourcemap.rojoProjectFile": "default.project.json",
     "luau-lsp.sourcemap.autogenerate": true,
-    "luau-lsp.sourcemap.enabled": true
+    "luau-lsp.sourcemap.enabled": true,
+    "luau-lsp.ignoreGlobs": [
+        "**/_Index/**",
+        "out/**"
+    ],
+    "luau-lsp.format.convertQuotes": true,
 }
