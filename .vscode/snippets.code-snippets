@@ -6,14 +6,14 @@
     ],
     "description": "Create a Quill Provider.",
     "body": [
-      "local ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g} = {}",
+      "const ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} = {}",
       "",
-      "function ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}.start(self: self)",
+      "function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}.start(self: self)",
       "",
       "end",
       "",
-      "export type self = typeof(${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g})",
-      "return ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}"
+      "export type self = typeof(${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g})",
+      "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}"
     ]
   },
   "Conch Command": {
@@ -23,9 +23,9 @@
     ],
     "description": "Create a Conch Command.",
     "body": [
-      "local conch = require('@packages/conch')",
+      "const conch = require('@pkg/conch')",
       "",
-      "local ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}_command = conch.register('${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}', {",
+      "const ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}Command = conch.register('${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}', {",
       "\tdescription = 'Description of the command',",
       "\tpermissions = { 'permission_name' },",
       "",
@@ -33,7 +33,7 @@
       "\tcallback = function() end",
       "})",
       "",
-      "return ${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}_command"
+      "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}_command"
     ]
   },
   "React Component": {
@@ -43,12 +43,22 @@
     ],
     "description": "Create a React Component.",
     "body": [
-      "local react = require('@packages/react')",
-      "local e = react.createElement",
+      "const react = require('@pkg/react')",
+      "const e = react.createElement",
       "",
-      "local function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}() end",
+      "const function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}() end",
       "",
       "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}"
+    ]
+  },
+  "Strict": {
+    "prefix": [
+      "strict",
+      "st"
+    ],
+    "description": "Inserts a strict mode flag.",
+    "body": [
+      "--!strict"
     ]
   }
 }
