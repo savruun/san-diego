@@ -1,6 +1,6 @@
 --!strict
 
-const signal = require('@packages/signal')
+const signal = require('@pkg/signal')
 const Store = {}
 
 export type Store<T> = {
