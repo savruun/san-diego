@@ -1,7 +1,7 @@
-local Players = game:GetService('Players')
-local conch = require('@packages/conch')
+const Players = game:GetService('Players')
+const conch = require('@pkg/conch')
 
-local ban_command = conch.register('ban', {
+const BanCommand = conch.register('ban', {
 	description = 'Bans a player from the server',
 	permissions = { 'use_ban' },
 
@@ -20,4 +20,4 @@ local ban_command = conch.register('ban', {
 	end,
 })
 
-return ban_command
+return BanCommand
