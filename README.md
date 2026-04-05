@@ -13,7 +13,7 @@
 + In the terminal run `lune run sourcemap`
 
 - Require a package
-+ We use string requires here, for example requiring a package looks like `local WCS = require('@packages/wcs')`
++ We use string requires here, for example requiring a package looks like `local WCS = require('@pkg/wcs')`
 + To see all available packages check wally.toml, you should also have intellisense for the requires
 
 - Sometimes I don't get intellisense requiring
