@@ -1,10 +1,10 @@
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local quill = require('@packages/quill-core')
-local quill_components = require('@packages/quill-rblx-components')
+const ReplicatedStorage = game:GetService('ReplicatedStorage')
+const components = require('@pkg/quill-rblx-components')
+const quill = require('@pkg/quill-core')
 
-local function get_modules()
-	local descendants = ReplicatedStorage.client.providers:GetDescendants()
-	local modules = {}
+const function getModules(): {ModuleScript}
+	const descendants = ReplicatedStorage.client.providers:GetDescendants()
+	const modules = {}
 
 	for _, v in descendants do
 		if not v:IsA('ModuleScript') then continue end
@@ -14,4 +14,4 @@ local function get_modules()
 	return modules
 end
 
-quill.new():with_modules(get_modules()):with_mod(quill_components.mod()):write()
+quill.new():with_modules(getModules()):with_mod(components.mod()):write()
