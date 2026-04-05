@@ -9,6 +9,15 @@ local results = {
 		'wally-package-types.exe',
 		{ '--sourcemap', 'sourcemap.json', 'Packages/', if fs.isDir('ServerPackages/') then 'ServerPackages/' else nil }
 	),
+	spkg_types = process.exec(
+		'wally-package-types.exe',
+		{
+			'--sourcemap',
+			'sourcemap.json',
+			'ServerPackages/',
+			if fs.isDir('ServerPackages/') then 'ServerPackages/' else nil,
+		}
+	),
 }
 
 for i: number, v: process.ExecResult in pairs(results) do
