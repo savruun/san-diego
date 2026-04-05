@@ -1,15 +1,13 @@
 [package]
 name = "savruun/sorcery"
 version = "0.1.0"
-registry = "https://github.com/savruun/SORCERY"
+registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 
 [dependencies]
-react = "jsdotlua/react@17.2.1"
-react-roblox = "jsdotlua/react-roblox@17.2.1"
 promise = "jsdotlua/promise@3.5.2"
 conch = "alicesaidhi/conch@0.3.1"
-conch_ui = "alicesaidhi/conch-ui@0.3.1"
+conch-ui = "alicesaidhi/conch-ui@0.3.1"
 quill-core = "featherfall-org/quill-core@0.1.0-alpha.2"
 quill-logger = "featherfall-org/quill-logger@0.1.0-alpha.2"
 quill-rblx-components = "featherfall-org/quill-rblx-components@0.1.0-alpha.2"
@@ -18,3 +16,7 @@ ui-labs = "pepeeltoro41/ui-labs@2.4.2"
 signal = "neonifieddev/signal@0.0.3"
 wcs = "cheetiedotpy/wcs@2.4.0"
 t = "osyrisrblx/t@3.1.1"
+vide = "alicesaidhi/vide@0.4.0"
+
+[server-dependencies]
+profilestore = "lm-loleris/profilestore@1.0.3"
