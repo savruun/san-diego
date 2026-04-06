@@ -1,4 +1,4 @@
-const types = {}
+local types = {}
 
 export type Array<T> = { T }
 export type Map<K, V> = { [K]: V }

@@ -1,4 +1,4 @@
-const Store = require('./Store')
+local Store = require('./Store')
 
-const PageStore = Store.new<<string | nil>>('')
+local PageStore = Store.new << string | nil >> ''
 return PageStore

@@ -1,18 +1,22 @@
 -- Services
-const Players = game:GetService('Players')
+local Players = game:GetService('Players')
+local StarterGui = game:GetService('StarterGui')
 
 -- Packages
-const vide = require('@pkg/')
+local vide = require('@pkg/vide')
+local root = vide.root
 
-const App = require('@client/interface/components/App')
-const paths = require('@shared/lib/paths')
-const player = Players.LocalPlayer
+local App = require('@client/interface/components/App')
+local paths = require('@shared/paths')
+local player = Players.LocalPlayer
 
--- Provider
-const InterfaceProvider = {}
+local InterfaceProvider = {
+	__rootCleanup = nil :: () -> (),
+}
 
-function InterfaceProvider.start(self: self): ()
-end
+function InterfaceProvider.start(self: self): () self.__rootCleanup = vide.mount(App, StarterGui) end
+
+function InterfaceProvider.cleanup(self: self) self.__rootCleanup() end
 
 export type self = typeof(InterfaceProvider)
 return InterfaceProvider

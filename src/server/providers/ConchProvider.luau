@@ -1,13 +1,13 @@
 --!strict
-const ServerScriptService = game:GetService('ServerScriptService')
+local ServerScriptService = game:GetService('ServerScriptService')
 
-const conch = require('@pkg/conch')
-const forEachPlayer = require('@shared/lib/forEachPlayer')
-const logger = require('@pkg/quill-logger')
+local conch = require('@pkg/conch')
+local forEachPlayer = require('@shared/lib/forEachPlayer')
+local logger = require('@pkg/quill-logger')
 
-const commandsFolder = ServerScriptService.server.commands
+local commandsFolder = ServerScriptService.server.commands
 
-const ConchProvider = {
+local ConchProvider = {
 	__logger = logger.new(script.Name, function(logged) end),
 }
 
@@ -25,7 +25,7 @@ function ConchProvider.registerCommands(self: self)
 
 	for _, commandModule in commandsFolder:GetDescendants() do
 		if not commandModule:IsA('ModuleScript') then continue end
-		xpcall(function()  end, warn)
+		xpcall(function() end, warn)
 	end
 end
 

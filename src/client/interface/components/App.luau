@@ -1,14 +1,18 @@
 -- Packages
-local usePage = require("@client/interface/hooks/usePage")
-const vide = require('@pkg/vide')
-const create = vide.create
+local usePage = require('@client/interface/hooks/usePage')
+local vide = require('@pkg/vide')
+local create = vide.create
 
-const function App()
-	const page = usePage()
-	
-	return create 'Frame' {
-		IgnoreGuiInset = true
-	}	
+local function App()
+	local page = usePage()
+
+	return create 'ScreenGui' {
+		IgnoreGuiInset = true,
+		ResetOnSpawn = true,
+		Name = 'VIDE_APP',
+
+		page,
+	}
 end
 
 return App

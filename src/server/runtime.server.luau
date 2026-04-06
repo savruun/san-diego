@@ -1,8 +1,8 @@
-const ServerScriptService = game:GetService('ServerScriptService')
-const quill = require('@pkg/quill-core')
-const component = require('@pkg/quill-rblx-components')
+local ServerScriptService = game:GetService('ServerScriptService')
+local component = require('@pkg/quill-rblx-components')
+local quill = require('@pkg/quill-core')
 
-const function getModules(): {ModuleScript}
+local function getModules(): { ModuleScript }
 	local descendants = ServerScriptService.server.providers:GetDescendants()
 	local modules = {}
 

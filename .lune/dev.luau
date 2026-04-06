@@ -4,13 +4,15 @@ local task = require('@lune/task')
 
 process.env['ROBLOX_DEV'] = true
 
-local sourcemap_process =
-	process.create('rojo.exe', { 'sourcemap', 'default.project.json', '-o', 'sourcemap.json', '--watch' })
-local darklua_process =
-	process.create('darklua.exe', { 'process', '--config', '.darklua.json', '--watch', 'src/', 'out/' })
-local rojo_process = process.create('rojo.exe', { 'serve', 'build.project.json' })
+local programSuffix = if process.os == 'windows' then '.exe' else ''
 
-local function check_ok(process: process.ChildProcess)
+local sourcemapProcess =
+	process.create('rojo', { `sourcemap{programSuffix}`, 'default.project.json', '-o', 'sourcemap.json', '--watch' })
+local darkluaProcess =
+	process.create(`darklua{programSuffix}`, { 'process', '--config', '.darklua.json', '--watch', 'src/', 'out/' })
+local rojoProcess = process.create(`rojo{programSuffix}`, { 'serve', 'build.project.json' })
+
+local function checkOk(process: process.ChildProcess)
 	local status = process:status()
 
 	if status.ok then
@@ -26,9 +28,9 @@ end
 
 task.spawn(function()
 	while task.wait(1) do
-		check_ok(sourcemap_process)
-		check_ok(darklua_process)
-		check_ok(rojo_process)
+		checkOk(sourcemapProcess)
+		checkOk(darkluaProcess)
+		checkOk(rojoProcess)
 	end
 end)
 

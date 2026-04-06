@@ -1,10 +1,8 @@
 --!strict
 
-const CombatProvider = {}
+local CombatProvider = {}
 
-function CombatProvider.start(self: self)
-
-end
+function CombatProvider.start(self: self) end
 
 export type self = typeof(CombatProvider)
 return CombatProvider

@@ -1,6 +1,6 @@
-const Players = game:GetService('Players')
+local Players = game:GetService('Players')
 
-const function forEachPlayer(callback: (Player) -> ()): RBXScriptConnection
+local function forEachPlayer(callback: (Player) -> ()): RBXScriptConnection
 	for _, player in Players:GetPlayers() do
 		callback(player)
 	end
