@@ -9,7 +9,8 @@ const metadata = require('@server/meta')
 local playerMeta = metadata.players
 
 const playerStore = profilestore.New('PlayerData', PLAYER_DATA_TEMPLATE)
-local profiles: { [Player]: typeof(playerStore:StartSessionAsync())} = {}
+local profiles: { [Player]: typeof(playerStore:StartSessionAsync()) } = {}
+local cleanups: { [number]: () -> () } = {}
 
 const PlayerDataProvider = {}
 
@@ -21,6 +22,14 @@ function PlayerDataProvider.start(self: self)
   Players.PlayerRemoving:Connect(function(player, exitReason)
     self:playerRemoving(player, exitReason)
   end)
+end
+
+function PlayerDataProvider.getProfile(self: self, player: Player)
+  return profiles[player.UserId]  
+end
+
+function PlayerDataProvider.getData(self: self, player: Player)
+  return self:getProfile(player).Data
 end
 
 function PlayerDataProvider.createPlayerProfile(self: self, player: Player)
@@ -52,7 +61,15 @@ end
 
 function PlayerDataProvider.playerAdded(self: self, player: Player)
   self:createPlayerProfile(player)
-  metadata[player.UserId] = nil -- placeholder til i setup charm which is gonna hold global state
+
+  local dataAtom = charm.atom(profiles[player.UserId].Data)
+
+  playerMeta[player.UserId] = {}
+  playerMeta[player.UserId].data = dataAtom
+
+  cleanups[player.UserId] = charm.subscribe(dataAtom, function(data)
+    profiles[player.UserId] = data
+  end)
 end
 
 function PlayerDataProvider.playerRemoving(self: self, player: Player, exitReason: Enum.PlayerExitReason)
@@ -61,6 +78,9 @@ function PlayerDataProvider.playerRemoving(self: self, player: Player, exitReaso
 
   profile:EndSession()
   profiles[player.UserId] = nil
+  
+  local cleanup = cleanups[player.UserId]
+  if cleanup then cleanup() end
 end
 
 export type self = typeof(PlayerDataProvider)
