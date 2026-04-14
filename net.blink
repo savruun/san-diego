@@ -1,2 +1,28 @@
 option ServerOutput = "src/server/net"
 option ClientOutput = "src/client/net"
+
+struct GunFireData {
+  firedAt: f32,
+  position: vector
+}
+
+struct BulletRenderData {
+  position: vector,
+  hit: vector,
+  type: string,
+  time: f32
+}
+
+event FireGun {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: GunFireData
+}
+
+event RenderBullet {
+  Type: Reliable,
+  From: Server,
+  Call: SingleAsync,
+  Data: BulletRenderData
+}
