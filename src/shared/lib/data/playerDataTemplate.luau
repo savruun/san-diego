@@ -1,0 +1,5 @@
+const PLAYER_DATA_TEMPLATE = {
+  cash = 0
+}
+
+return PLAYER_DATA_TEMPLATE

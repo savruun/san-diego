@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "concurrently \"rojo sourcemap default.project.json -o sourcemap.json --watch\" \"rojo serve build.project.json\" \"watchexec -r -e luau -- npm run build\"",
+    "install": "npm run sourcemap && npm run install:deps && npm run install:types",
+    "install:deps": "wally install",
+    "install:types": "npm run types:shared && npm run types:server",
+    "sourcemap": "rojo sourcemap default.project.json --output sourcemap.json",
+    "types:shared": "wally-package-types --sourcemap sourcemap.json Packages/",
+    "types:server": "wally-package-types --sourcemap sourcemap.json ServerPackages/",
+    "studio": "node .scripts/studio.js",
+    "build": "node .scripts/build.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

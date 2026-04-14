@@ -1,11 +1,12 @@
 {
   "aliases": {
     "lune": "~/.lune/.typedefs/0.10.4/",
-    "ext": "ext/",
-    "pkg": "Packages/",
-    "spkg": "ServerPackages/",
-    "client": "src/client/",
-    "server": "src/server/",
-    "shared": "src/shared/"
+    "pkg": "Packages",
+    "spkg": "ServerPackages",
+    "client": "src/client",
+    "server": "src/server",
+    "shared": "src/shared",
+    "types": "src/shared/types",
+    "ui": "src/client/interface"
   }
 }

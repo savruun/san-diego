@@ -17,6 +17,8 @@ signal = "neonifieddev/signal@0.0.3"
 wcs = "cheetiedotpy/wcs@2.4.0"
 t = "osyrisrblx/t@3.1.1"
 vide = "alicesaidhi/vide@0.4.0"
+charm = "littensy/charm@0.11.0-rc.5"
+vide-charm = "littensy/vide-charm@0.3.0"
 
 [server-dependencies]
 profilestore = "lm-loleris/profilestore@1.0.3"

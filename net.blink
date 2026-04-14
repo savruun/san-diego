@@ -1,14 +1,2 @@
 option ServerOutput = "src/server/net"
 option ClientOutput = "src/client/net"
-
-struct AbilityData {
-  ability: string,
-  used_at: f32,
-}
-
-event UseAbilityEvent {
-  From: Client,
-  Data: AbilityData,
-  Call: SingleAsync,
-  Type: Reliable
-}

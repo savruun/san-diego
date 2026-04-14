@@ -1,9 +1,9 @@
 --!strict
 
-local conch = require('@pkg/conch')
-local conchUi = require('@pkg/conch-ui')
+const conch = require('@pkg/conch')
+const conchUi = require('@pkg/conch-ui')
 
-local ConchProvider = {}
+const ConchProvider = {}
 
 function ConchProvider.start(self: self) self:startConch() end
 

@@ -1,7 +1,10 @@
 --!strict
 
-const signal = require('@pkg/signal')
-const Store = {}
+const ReplicatedStorage = game:GetService('ReplicatedStorage')
+const Pkg = ReplicatedStorage.packages
+
+const signal = require(Pkg.signal)
+local Store = {}
 
 export type Store<T> = {
 	__signal: signal.Signal<T>,
@@ -28,8 +31,8 @@ end
 function Store.get<T>(self: Store<T>) return self.__value end
 
 function Store.set<T>(self: Store<T>, value: T): ()
-  self.__value = value
-  self.__signal:Fire(value)
+	self.__value = value
+	self.__signal:Fire(value)
 end
 
 return Store

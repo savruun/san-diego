@@ -1,8 +1,8 @@
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local RunService = game:GetService('RunService')
-local ServerScriptService = game:GetService('ServerScriptService')
+const ReplicatedStorage = game:GetService('ReplicatedStorage')
+const RunService = game:GetService('RunService')
+const ServerScriptService = game:GetService('ServerScriptService')
 
-local paths = {}
+const paths = {}
 
 paths.client = ReplicatedStorage:WaitForChild('client')
 paths.shared = ReplicatedStorage:WaitForChild('shared')

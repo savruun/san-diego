@@ -1,20 +1,35 @@
+--!strict
+
 -- Services
-local Players = game:GetService('Players')
-local StarterGui = game:GetService('StarterGui')
+const Players = game:GetService('Players')
 
--- Packages
-local vide = require('@pkg/vide')
-local root = vide.root
+const App = require('@ui/components/App')
+const vide = require('@pkg/vide')
+const charm = require('@pkg/charm')
 
-local App = require('@client/interface/components/App')
-local paths = require('@shared/paths')
-local player = Players.LocalPlayer
+const atom = charm.atom
+const player = Players.LocalPlayer
 
-local InterfaceProvider = {
-	__rootCleanup = nil :: () -> (),
+const InterfaceProvider = {
+	__rootCleanup = function() end,
+	page = atom<<string?>>(),
+	mountedComponents = atom<<{ string }>>({})
 }
 
-function InterfaceProvider.start(self: self): () self.__rootCleanup = vide.mount(App, StarterGui) end
+function InterfaceProvider.start(self: self): ()
+	const playerGui = player:WaitForChild('PlayerGui')
+
+	self.__rootCleanup = vide.mount(function()
+		return App(self.page, self.mountedComponents)
+	end, playerGui)
+
+	self:setDefaultValues()
+end
+ 
+function InterfaceProvider.setDefaultValues(self: self)
+	self.page('HUD')
+	self.mountedComponents({ 'CharacterSidebarContainer' })
+end
 
 function InterfaceProvider.cleanup(self: self) self.__rootCleanup() end
 

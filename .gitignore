@@ -9,3 +9,4 @@ Packages/
 out/
 ServerPackages/
 sourcemap.json
+node_modules/

@@ -1,6 +1,6 @@
-local conch = require('@pkg/conch')
+const conch = require('@pkg/conch')
 
-local KickCommand = conch.register('kick', {
+const KickCommand = conch.register('kick', {
 	description = 'Kicks a player from the server',
 	permissions = { 'use_kick' },
 

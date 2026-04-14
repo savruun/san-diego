@@ -1,6 +1,6 @@
 --!strict
 
-local CombatProvider = {}
+const CombatProvider = {}
 
 function CombatProvider.start(self: self) end
 

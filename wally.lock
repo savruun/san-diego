@@ -58,6 +58,21 @@ version = "3.5.2"
 dependencies = []
 
 [[package]]
+name = "littensy/charm"
+version = "0.10.0"
+dependencies = []
+
+[[package]]
+name = "littensy/charm"
+version = "0.11.0-rc.5"
+dependencies = []
+
+[[package]]
+name = "littensy/vide-charm"
+version = "0.3.0"
+dependencies = [["Vide", "centau/vide@0.3.1"], ["charm", "littensy/charm@0.10.0"]]
+
+[[package]]
 name = "lm-loleris/profilestore"
 version = "1.0.3"
 dependencies = []
@@ -80,4 +95,4 @@ dependencies = []
 [[package]]
 name = "savruun/sorcery"
 version = "0.1.0"
-dependencies = [["conch", "alicesaidhi/conch@0.3.1"], ["conch-ui", "alicesaidhi/conch-ui@0.3.1"], ["promise", "jsdotlua/promise@3.5.2"], ["quill-core", "featherfall-org/quill-core@0.1.0-alpha.2"], ["quill-logger", "featherfall-org/quill-logger@0.1.0-alpha.2"], ["quill-rblx-components", "featherfall-org/quill-rblx-components@0.1.0-alpha.2"], ["quill-rblx-lifecycles", "featherfall-org/quill-rblx-lifecycles@0.1.0-alpha.1"], ["signal", "neonifieddev/signal@0.0.3"], ["t", "osyrisrblx/t@3.1.1"], ["ui-labs", "pepeeltoro41/ui-labs@2.4.2"], ["vide", "alicesaidhi/vide@0.4.0"], ["wcs", "cheetiedotpy/wcs@2.5.0"], ["profilestore", "lm-loleris/profilestore@1.0.3"]]
+dependencies = [["charm", "littensy/charm@0.11.0-rc.5"], ["conch", "alicesaidhi/conch@0.3.1"], ["conch-ui", "alicesaidhi/conch-ui@0.3.1"], ["promise", "jsdotlua/promise@3.5.2"], ["quill-core", "featherfall-org/quill-core@0.1.0-alpha.2"], ["quill-logger", "featherfall-org/quill-logger@0.1.0-alpha.2"], ["quill-rblx-components", "featherfall-org/quill-rblx-components@0.1.0-alpha.2"], ["quill-rblx-lifecycles", "featherfall-org/quill-rblx-lifecycles@0.1.0-alpha.1"], ["signal", "neonifieddev/signal@0.0.3"], ["t", "osyrisrblx/t@3.1.1"], ["ui-labs", "pepeeltoro41/ui-labs@2.4.2"], ["vide", "alicesaidhi/vide@0.4.0"], ["vide-charm", "littensy/vide-charm@0.3.0"], ["wcs", "cheetiedotpy/wcs@2.5.0"], ["profilestore", "lm-loleris/profilestore@1.0.3"]]

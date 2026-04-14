@@ -6,7 +6,7 @@
     ],
     "description": "Create a Quill Provider.",
     "body": [
-      "local ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} = {}",
+      "const ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} = {}",
       "",
       "function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}.start(self: self)",
       "",
@@ -23,9 +23,9 @@
     ],
     "description": "Create a Conch Command.",
     "body": [
-      "local conch = require('@pkg/conch')",
+      "const conch = require('@pkg/conch')",
       "",
-      "local ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}Command = conch.register('${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}', {",
+      "const ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}Command = conch.register('${TM_FILENAME_BASE/(.*)/${1:/snakecase}/g}', {",
       "\tdescription = 'Description of the command',",
       "\tpermissions = { 'permission_name' },",
       "",
@@ -33,7 +33,7 @@
       "\tcallback = function() end",
       "})",
       "",
-      "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}_command"
+      "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}Command"
     ]
   },
   "React Component": {
@@ -59,6 +59,42 @@
     "description": "Inserts a strict mode flag.",
     "body": [
       "--!strict"
+    ]
+  },
+  "Pkg": {
+    "prefix": [
+      "@pkg"
+    ],
+    "description": "Autofills the pkg dir.",
+    "body": [
+      "@game/ReplicatedStorage/packages"
+    ]
+  },
+  "Client": {
+    "prefix": [
+      "@client"
+    ],
+    "description": "Autofills the pkg dir.",
+    "body": [
+      "@game/ReplicatedStorage/client"
+    ]
+  },
+  "Server": {
+    "prefix": [
+      "@server"
+    ],
+    "description": "Autofills the pkg dir.",
+    "body": [
+      "@game/ServerScriptService/server"
+    ]
+  },
+  "SPkg": {
+    "prefix": [
+      "@spkg"
+    ],
+    "description": "Autofills the pkg dir.",
+    "body": [
+      "@game/ServerScriptService/packages"
     ]
   }
 }
