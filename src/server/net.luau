@@ -162,22 +162,50 @@ local Queue: any = {
 local SerdesEvent = "?"
 local SerdesThread: thread?
 Queue.Reliable[0] = table.create(256)
-export type AbilityData = { ability: string, ["used_at"]: number }
-function SerdesFunctions.ReadEVENT_UseAbilityEvent(): ({ ability: string, ["used_at"]: number })
-	-- Read BLOCK: 6 bytes
-	local BLOCK_START = Read(6)
+export type GunFireData = { firedAt: number, position: Vector3 }
+export type BulletRenderData = { position: Vector3, hit: Vector3, type: string, time: number }
+function SerdesFunctions.ReadEVENT_FireGun(): ({ firedAt: number, position: Vector3 })
+	-- Read BLOCK: 16 bytes
+	local BLOCK_START = Read(16)
 	local Value = {} :: any
-	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
-	Value.ability = buffer.readstring(RecieveBuffer, Read(Length), Length)
-	Value["used_at"] = buffer.readf32(RecieveBuffer, BLOCK_START + 2)
+	Value.firedAt = buffer.readf32(RecieveBuffer, BLOCK_START + 0)
+	local X = buffer.readf32(RecieveBuffer, BLOCK_START + 4)
+	local Y = buffer.readf32(RecieveBuffer, BLOCK_START + 8)
+	local Z = buffer.readf32(RecieveBuffer, BLOCK_START + 12)
+	Value.position = Vector3.new(X, Y, Z)
 	return Value
+end
+
+function SerdesFunctions.WriteEVENT_RenderBullet(Value: { position: Vector3, hit: Vector3, type: string, time: number }): ()
+	-- Allocate BLOCK: 31 bytes
+	local BLOCK_START = Allocate(31)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 1)
+	local Vector = Value.position
+	buffer.writef32(SendBuffer, BLOCK_START + 1, Vector.X)
+	buffer.writef32(SendBuffer, BLOCK_START + 5, Vector.Y)
+	buffer.writef32(SendBuffer, BLOCK_START + 9, Vector.Z)
+	local Vector = Value.hit
+	buffer.writef32(SendBuffer, BLOCK_START + 13, Vector.X)
+	buffer.writef32(SendBuffer, BLOCK_START + 17, Vector.Y)
+	buffer.writef32(SendBuffer, BLOCK_START + 21, Vector.Z)
+	local Length = #Value.type
+	buffer.writeu16(SendBuffer, BLOCK_START + 25, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value.type, Length)
+	buffer.writef32(SendBuffer, BLOCK_START + 27, Value.time)
 end
 
 if not RunService:IsRunning() then
 	local NOOP = function() end
 	local Returns = table.freeze({
-	UseAbilityEvent = {
+	FireGun = {
 		On = NOOP
+	},
+	RenderBullet = {
+		Fire = NOOP,
+		FireAll = NOOP,
+		FireList = NOOP,
+		FireExcept = NOOP
 	},
 	})
 	return Returns :: BLINK_EVENTS_SYMBOL
@@ -242,12 +270,12 @@ Reliable.OnServerEvent:Connect(function(Player: Player, Buffer: buffer, Instance
 		local BLOCK_START = Read(1)
 		local Index = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
 		if Index == 0 then
-			local Value: { ability: string, ["used_at"]: number } = SerdesFunctions.ReadEVENT_UseAbilityEvent()
+			local Value: { firedAt: number, position: Vector3 } = SerdesFunctions.ReadEVENT_FireGun()
 			if Events.Reliable[0] ~= nil then
 				task.spawn(Events.Reliable[0], Player, Value)
 			else
 				if #Queue.Reliable[0] > 256 then
-					warn("[Blink]: Event queue of \"UseAbilityEvent\" exceeded 256, did you forget to implement a listener?")
+					warn("[Blink]: Event queue of \"FireGun\" exceeded 256, did you forget to implement a listener?")
 				end
 				table.insert(Queue.Reliable[0], {Player, Value} :: {any})
 			end
@@ -276,8 +304,8 @@ end)
 local Returns = table.freeze({
 	StepReplication = StepReplication,
 
-	UseAbilityEvent = {
-		On = function(Listener: (Player: Player, Value: { ability: string, ["used_at"]: number }) -> ()): () -> ()
+	FireGun = {
+		On = function(Listener: (Player: Player, Value: { firedAt: number, position: Vector3 }) -> ()): () -> ()
 			Events.Reliable[0] = Listener
 			for Index, Arguments in Queue.Reliable[0] do
 				task.spawn(Listener, table.unpack(Arguments))
@@ -289,6 +317,52 @@ local Returns = table.freeze({
 				end
 			end
 		end
+	},
+	RenderBullet = {
+		Fire = function(Player: Player, Value: { position: Vector3, hit: Vector3, type: string, time: number }): ()
+			Load(PlayersMap[Player])
+			SerdesFunctions.WriteEVENT_RenderBullet(Value)
+			PlayersMap[Player] = Save()
+		end,
+		FireAll = function(Value: { position: Vector3, hit: Vector3, type: string, time: number }): ()
+			Load()
+			SerdesFunctions.WriteEVENT_RenderBullet(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in Players:GetPlayers() do
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
+		FireList = function(List: {Player}, Value: { position: Vector3, hit: Vector3, type: string, time: number }): ()
+			Load()
+			SerdesFunctions.WriteEVENT_RenderBullet(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in List do
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
+		FireExcept = function(Except: Player, Value: { position: Vector3, hit: Vector3, type: string, time: number }): ()
+			Load()
+			SerdesFunctions.WriteEVENT_RenderBullet(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in Players:GetPlayers() do
+				if Player == Except then
+					continue
+				end
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
 	},
 })
 type BLINK_EVENTS_SYMBOL = typeof(Returns)

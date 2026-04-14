@@ -10,3 +10,5 @@ out/
 ServerPackages/
 sourcemap.json
 node_modules/
+src/client/net.luau
+src/server/net.luau
