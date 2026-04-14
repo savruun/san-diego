@@ -1,6 +1,3 @@
-local vide = require('@pkg/vide')
-
-
 const function map<K, V, U>(source: { [K]: V }, fn: (V, K) -> U)
   local result = {}
 
