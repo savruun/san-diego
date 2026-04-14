@@ -36,17 +36,19 @@
       "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}Command"
     ]
   },
-  "React Component": {
+  "Vide Component": {
     "prefix": [
-      "component",
-      "cmp"
+      "vide",
+      "ui"
     ],
-    "description": "Create a React Component.",
+    "description": "Create a Vide Component.",
     "body": [
-      "local react = require('@pkg/react')",
-      "local e = react.createElement",
+      "const vide = require('@pkg/vide')",
+      "const create = vide.create",
       "",
-      "local function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}() end",
+      "const function ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}()",
+      "\treturn create 'Frame' {}",
+      "end",
       "",
       "return ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g}"
     ]
@@ -59,42 +61,6 @@
     "description": "Inserts a strict mode flag.",
     "body": [
       "--!strict"
-    ]
-  },
-  "Pkg": {
-    "prefix": [
-      "@pkg"
-    ],
-    "description": "Autofills the pkg dir.",
-    "body": [
-      "@game/ReplicatedStorage/packages"
-    ]
-  },
-  "Client": {
-    "prefix": [
-      "@client"
-    ],
-    "description": "Autofills the pkg dir.",
-    "body": [
-      "@game/ReplicatedStorage/client"
-    ]
-  },
-  "Server": {
-    "prefix": [
-      "@server"
-    ],
-    "description": "Autofills the pkg dir.",
-    "body": [
-      "@game/ServerScriptService/server"
-    ]
-  },
-  "SPkg": {
-    "prefix": [
-      "@spkg"
-    ],
-    "description": "Autofills the pkg dir.",
-    "body": [
-      "@game/ServerScriptService/packages"
     ]
   }
 }
