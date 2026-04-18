@@ -9,35 +9,40 @@ local OUT_DIR = 'out'
 if fs.isDir(OUT_DIR) then fs.removeDir(OUT_DIR) end
 fs.writeDir(OUT_DIR)
 
-local requireRegex = {
+local requirePatterns = {
 	{
-		regex.new(`require\(([\'\"\`])@pkg\/([^\'\"\`]+)\1\)`),
-		`require('@game/ReplicatedStorage/packages/$2')`,
+		'require%(([\'"`])@pkg/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ReplicatedStorage/packages/%2\')',
 	},
 
 	{
-		regex.new(`/require\(([\'\"\`])@client\/([^\'\"\`]+)\1\)/g`),
-		`require('@game/ReplicatedStorage/client/$2')`,
+		'require%(([\'"`])@spkg/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ServerScriptService/packages/%2\')',
 	},
 
 	{
-		regex.new(`/require\(([\'\"\`])@server\/([^\'\"\`]+)\1\)/g`),
-		`require('@game/ServerScriptService/server/$2')`,
+		'require%(([\'"`])@client/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ReplicatedStorage/client/%2\')',
 	},
 
 	{
-		regex.new(`/require\(([\'\"\`])@ui\/([^\'\"\`]+)\1\)/g`),
-		`require('@game/ReplicatedStorage/client/interface/$2')`,
+		'require%(([\'"`])@server/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ServerScriptService/server/%2\')',
 	},
 
 	{
-		regex.new(`/require\(([\'\"\`])@types\/([^\'\"\`]+)\1\)/g`),
-		`require('@game/ReplicatedStorage/shared/types/$2')`,
+		'require%(([\'"`])@ui/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ReplicatedStorage/client/interface/%2\')',
 	},
 
 	{
-		regex.new(`/require\(([\'\"\`])@shared\/([^\'\"\`]+)\1\)/g`),
-		`require('@game/ReplicatedStorage/shared/$2')`,
+		'require%(([\'"`])@types/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ReplicatedStorage/shared/types/%2\')',
+	},
+
+	{
+		'require%(([\'"`])@shared/([^\'"`]+)[\'"`]%)',
+		'require(\'@game/ReplicatedStorage/shared/%2\')',
 	},
 }
 
@@ -61,38 +66,36 @@ function walk(dir: string): { string }
 	return results
 end
 
-function transform(content)
-	for _, rePair in requireRegex do
-		local regex: regex.Regex = rePair[1]
-		local replacement: string = rePair[2]
+function transform(content: string)
+	for _, patternPair in requirePatterns do
+		local pattern: string = patternPair[1]
+		local replacement: string = patternPair[2]
 
-		content = regex:replaceAll(content, replacement)
+		content = content:gsub(pattern, replacement)
 	end
 
 	return content
 end
 
--- local files = walk(cwd .. SRC_DIR)
--- local pathRegex = regex.new('/src/')
--- local fileRegex = regex.new('%.luau?$') -- matches .lua OR .luau at end
--- local dirRegex = regex.new('(.+)/[^/]+$')
+local files = walk(cwd .. SRC_DIR)
+local pathRegex = regex.new('/src/')
+local fileRegex = regex.new('%.luau?$') -- matches .lua OR .luau at end
+local dirRegex = regex.new('(.+)/[^/]+$')
 
--- for _, file in files do
--- 	local outPath = pathRegex:replace(file, '/out/')
+for _, file in files do
+	local outPath = pathRegex:replace(file, '/out/')
 
--- 	local dirReCaptures = dirRegex:captures(outPath)
--- 	if not dirReCaptures then continue end
+	local dirReCaptures = dirRegex:captures(outPath)
+	if not dirReCaptures then continue end
 
--- 	local capOne = dirReCaptures:get(1)
--- 	if not capOne then continue end
+	local capOne = dirReCaptures:get(1)
+	if not capOne then continue end
 
--- 	local dir = capOne.text
--- 	if dir and not fs.isDir(dir) then fs.writeDir(dir) end
+	local dir = capOne.text
+	if dir and not fs.isDir(dir) then fs.writeDir(dir) end
 
--- 	local fileContent = fs.readFile(file)
--- 	local transformed = transform(fileContent)
+	local fileContent = fs.readFile(file)
+	local transformed = transform(fileContent)
 
--- 	if not fs.isFile(outPath) then fs.writeFile(outPath, transformed) end
--- end
-local re = regex.new(`require\(([\'\"\`])@pkg\/([^\'\"\`]+)\1\)`)
-print(re:isMatch(`const component = require('@pkg/quill-rblx-components')`))
+	if not fs.isFile(outPath) then fs.writeFile(outPath, transformed) end
+end
