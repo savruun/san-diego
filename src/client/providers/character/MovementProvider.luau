@@ -9,7 +9,7 @@ const MovementProvider = {
   humanoid = nil :: Humanoid?
 }
 
-MovementProvider.CharacterProvider = dependency.use(require('@client/providers/CharacterProvider'))
+MovementProvider.CharacterProvider = dependency.use(require('./CharacterProvider'))
 
 function MovementProvider.start(self: self): ()
   self.character = self.CharacterProvider:getCharacter()
