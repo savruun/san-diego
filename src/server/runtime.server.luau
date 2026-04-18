@@ -1,5 +1,6 @@
 const ServerScriptService = game:GetService('ServerScriptService')
 const component = require('@pkg/quill_rblx_components')
+const dependency = require('@pkg/quill_dependencies')
 const quill = require('@pkg/quill_core')
 
 const function getModules(): { ModuleScript }
@@ -14,4 +15,4 @@ const function getModules(): { ModuleScript }
 	return modules
 end
 
-quill.new():with_modules(getModules()):with_mod(component.mod()):write()
+quill.new():with_modules(getModules()):with_mod(component.mod()):with_mod(dependency.mod()):write()
