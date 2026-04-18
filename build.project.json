@@ -8,7 +8,7 @@
         "$path": "out/client"
       },
       "packages": {
-        "$path": "Packages"
+        "$path": "roblox_packages"
       },
       "shared": {
         "$path": "out/shared"
@@ -20,7 +20,7 @@
         "$path": "out/server"
       },
       "packages": {
-        "$path": "ServerPackages"
+        "$path": "roblox_server_packages"
       }
     },
     "StarterPlayer": {

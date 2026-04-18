@@ -12,3 +12,7 @@ sourcemap.json
 node_modules/
 src/client/net.luau
 src/server/net.luau
+luau_packages/
+lune_packages/
+roblox_packages/
+roblox_server_packages/

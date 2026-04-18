@@ -1,8 +1,8 @@
 {
   "aliases": {
     "lune": "~/.lune/.typedefs/0.10.4/",
-    "pkg": "Packages",
-    "spkg": "ServerPackages",
+    "pkg": "roblox_packages",
+    "spkg": "roblox_server_packages",
     "client": "src/client",
     "server": "src/server",
     "shared": "src/shared",
