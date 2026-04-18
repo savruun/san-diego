@@ -1,6 +1,9 @@
 {
   "aliases": {
     "lune": "~/.lune/.typedefs/0.10.4/",
+    "csingletons": "src/client/providers",
+    "ssingletons": "src/server/providers",
+    "lib": "src/shared/lib",
     "pkg": "roblox_packages",
     "spkg": "roblox_server_packages",
     "client": "src/client",
