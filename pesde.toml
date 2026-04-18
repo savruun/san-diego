@@ -18,6 +18,7 @@ roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau
 sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
 build = ".pesde/scripts/build.luau"
 studio = ".pesde/scripts/studio.luau"
+start = ".pesde/scripts/start.luau"
 
 [dev_dependencies]
 scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
