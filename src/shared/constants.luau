@@ -1,8 +1,8 @@
 const constants = {}
 
 constants.fov = {
-  default = 30,
-  sprinting = 35
+  default = 70,
+  sprinting = 75
 }
 
 constants.walkspeed = {
