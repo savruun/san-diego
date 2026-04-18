@@ -3,12 +3,12 @@
 const Players = game:GetService('Players')
 const player = Players.LocalPlayer
 
-const signal = require('@pkg/signal')
+const Signal = require('@shared/lib/signal')
 
 const CharacterProvider = {
   character = nil :: Model?,
   humanoid  = nil :: Humanoid?,
-  spawned = signal.new<<(Model, Humanoid)>>()
+  spawned = Signal.new<<(Model, Humanoid)>>()
 }
 
 function CharacterProvider.start(self: self): ()
