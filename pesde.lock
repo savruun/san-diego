@@ -33,23 +33,6 @@ language = [{ name = "alicesaidhi/conch_language", version = "^0.4.0-rc.6", inde
 ref_ty = "pesde"
 index_url = "https://github.com/daimond113/pesde-index"
 
-[graph."alicesaidhi/conch_ui@0.4.0-rc.6 roblox"]
-direct = ["conch_ui", { name = "alicesaidhi/conch_ui", version = "^0.4.0-rc.6", index = "default" }, "standard"]
-
-[graph."alicesaidhi/conch_ui@0.4.0-rc.6 roblox".dependencies]
-conch = ["alicesaidhi/conch@0.4.0-rc.6 roblox", "standard"]
-language = ["alicesaidhi/conch_language@0.4.0-rc.6 roblox", "standard"]
-vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
-
-[graph."alicesaidhi/conch_ui@0.4.0-rc.6 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/pesde-pkg/index"
-
-[graph."alicesaidhi/conch_ui@0.4.0-rc.6 roblox".pkg_ref.dependencies]
-conch = [{ name = "alicesaidhi/conch", version = "^0.4.0-rc.6", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-language = [{ name = "alicesaidhi/conch_language", version = "^0.4.0-rc.6", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-vide = [{ wally = "wally#centau/vide", version = "^0.3.1", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
-
 [graph."alicesaidhi/vide@0.4.1-testing.4 roblox"]
 direct = ["vide", { name = "alicesaidhi/vide", version = "^0.4.1-testing.4", index = "default" }, "standard"]
 
@@ -282,6 +265,37 @@ option = [{ name = "lukadev_0/option", version = "^1.2.1", index = "https://gith
 pathfs = [{ name = "jiwonz/pathfs", version = "^0.6.0", index = "https://github.com/pesde-pkg/index" }, "standard"]
 result = [{ name = "lukadev_0/result", version = "^1.2.1", index = "https://github.com/pesde-pkg/index" }, "peer"]
 unzip = [{ name = "0x5eal/unzip", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
+
+[graph."wally#alicesaidhi/conch@0.4.0-rc.8 roblox".dependencies]
+language = ["wally#alicesaidhi/conch-language@0.4.0-rc.7 roblox", "standard"]
+
+[graph."wally#alicesaidhi/conch@0.4.0-rc.8 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#alicesaidhi/conch@0.4.0-rc.8 roblox".pkg_ref.dependencies]
+language = [{ wally = "wally#alicesaidhi/conch-language", version = ">=0.4.0-rc.7, <0.5.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+
+[graph."wally#alicesaidhi/conch-language@0.4.0-rc.7 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#alicesaidhi/conch-ui@0.4.0-rc.7 roblox"]
+direct = ["conch-ui", { wally = "wally#alicesaidhi/conch-ui", version = "^0.4.0-rc.7", index = "default" }, "standard"]
+
+[graph."wally#alicesaidhi/conch-ui@0.4.0-rc.7 roblox".dependencies]
+conch = ["wally#alicesaidhi/conch@0.4.0-rc.8 roblox", "standard"]
+language = ["wally#alicesaidhi/conch-language@0.4.0-rc.7 roblox", "standard"]
+vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
+
+[graph."wally#alicesaidhi/conch-ui@0.4.0-rc.7 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#alicesaidhi/conch-ui@0.4.0-rc.7 roblox".pkg_ref.dependencies]
+conch = [{ wally = "wally#alicesaidhi/conch", version = ">=0.4.0-rc.7, <0.5.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+language = [{ wally = "wally#alicesaidhi/conch-language", version = ">=0.4.0-rc.7, <0.5.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+vide = [{ wally = "wally#centau/vide", version = ">=0.3.1, <0.4.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
 
 [graph."wally#breezy1214/ezinput@0.1.1 roblox"]
 direct = ["ezinput", { wally = "wally#breezy1214/ezinput", version = "^0.1.1", index = "default" }, "standard"]
