@@ -16,7 +16,7 @@ const SbanCommand = conch.register('sban', {
 
   arguments = function()
 		return conch.args.player('player', 'The player to kick.'),
-			conch.args.optional(conch.args.string('reason', 'The reason for banning the player.'))
+			conch.args.opt(conch.args.string('reason', 'The reason for banning the player.'))
 	end,
 
   callback = function(player: Player, reason: string?)

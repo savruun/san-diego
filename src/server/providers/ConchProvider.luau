@@ -3,7 +3,7 @@ const ServerScriptService = game:GetService('ServerScriptService')
 
 const conch = require('@pkg/conch')
 const playerUtility = require('@shared/lib/playerUtility')
-const logger = require('@pkg/quill-logger')
+const logger = require('@pkg/quill_logger')
 
 const commandsFolder = ServerScriptService.server.commands
 

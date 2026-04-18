@@ -9,7 +9,7 @@ const metadata = require('@server/meta')
 local playerMeta = metadata.players
 
 const playerStore = profilestore.New('PlayerData', PLAYER_DATA_TEMPLATE)
-local profiles: { [Player]: typeof(playerStore:StartSessionAsync()) } = {}
+local profiles: { [number]: typeof(playerStore:StartSessionAsync()) } = {}
 local cleanups: { [number]: () -> () } = {}
 
 const PlayerDataProvider = {}
@@ -49,7 +49,7 @@ function PlayerDataProvider.createPlayerProfile(self: self, player: Player)
     end)
 
     if player.Parent == Players then
-      profiles[player] = profile
+      profiles[player.UserId] = profile
       print(profiles[player.UserId])
     else
       profile:EndSession()

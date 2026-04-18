@@ -6,7 +6,7 @@ const KickCommand = conch.register('kick', {
 
 	arguments = function()
 		return conch.args.player('player', 'The player to kick.'),
-			conch.args.optional(conch.args.string('reason', 'The reason for kicking the player.'))
+			conch.args.opt(conch.args.string('reason', 'The reason for kicking the player.'))
 	end,
 
 	callback = function(player: Player, reason: string?)

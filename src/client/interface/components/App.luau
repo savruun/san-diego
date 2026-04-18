@@ -2,11 +2,11 @@
 
 const vide = require('@pkg/vide')
 const charm = require('@pkg/charm')
-const useAtom = require('@pkg/vide-charm').useAtom
 
 const getComponents = require('@ui/util/getComponents')
 const getPages = require('@ui/util/getPages')
 const map = require('@ui/util/map')
+const useAtom = require('@ui/util/useAtom')
 
 const create = vide.create
 const values = vide.values
