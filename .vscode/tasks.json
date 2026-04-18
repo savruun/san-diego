@@ -4,7 +4,7 @@
     {
       "label": "Rojo Dev",
       "type": "shell",
-      "command": "npm start",
+      "command": "pesde run start",
       "presentation": {
         "panel": "dedicated",
         "reveal": "always"
@@ -14,7 +14,7 @@
     {
       "label": "Roblox Studio",
       "type": "shell",
-      "command": "npm run studio",
+      "command": "pesde run studio",
       "presentation": {
         "panel": "dedicated",
         "reveal": "always"

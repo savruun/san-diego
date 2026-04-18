@@ -79,7 +79,6 @@ end
 
 local files = walk(cwd .. SRC_DIR)
 local pathRegex = regex.new('/src/')
-local fileRegex = regex.new('%.luau?$') -- matches .lua OR .luau at end
 local dirRegex = regex.new('(.+)/[^/]+$')
 
 for _, file in files do
