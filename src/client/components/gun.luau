@@ -1,4 +1,5 @@
 const components = require('@pkg/quill_rblx_components')
+const dependency = require('@pkg/quill_dependencies')
 
 -- Component Class
 local Gun = {}
@@ -6,6 +7,9 @@ Gun.__index = Gun
 
 type GunProperties = { }
 export type self = setmetatable<GunProperties, typeof(Gun)>
+
+
+const CombatProvider = dependency.use(require('@csingletons/combat/CombatProvider'))
 
 -- Runs when the component is bound to an Instance
 function Gun.init(self: self)
@@ -15,6 +19,10 @@ end
 function Gun.destroy(self: self)
 end
 
+
+function Gun.fire(self: self)
+  CombatProvider:renderBullet()
+end
 
 -- Quill component wrapper
 local GunComponent = {}
