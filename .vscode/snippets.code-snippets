@@ -62,5 +62,51 @@
     "body": [
       "--!strict"
     ]
+  },
+  "Quill Component": {
+    "prefix": [
+      "quillcomp",
+      "comp",
+      "component"
+    ],
+    "body": [
+      "const components = require('@pkg/quill_rblx_components')",
+      "",
+      "-- Component Class",
+      "local ${1:${TM_FILENAME_BASE/(^|_|-)(\\w)/${2:/upcase}/g}} = {}",
+      "${1}.__index = ${1}",
+      "",
+      "type ${1}Properties = { }",
+      "export type self = setmetatable<${1}Properties, typeof(${1})>",
+      "",
+      "-- Runs when the component is bound to an Instance",
+      "function ${1}.init(self: self)",
+      "end",
+      "",
+      "-- Runs when the Instance is destroyed",
+      "function ${1}.destroy(self: self)",
+      "end",
+      "",
+      "",
+      "-- Quill component wrapper",
+      "local ${1}Component = {}",
+      "",
+      "-- Contains info such as filters",
+      "${1}Component.info = components.info {",
+      "  is = components.singleton('INSTANCE_TYPE_HERE'),",
+      "  tag = components.singleton('${1}')",
+      "}",
+      "",
+      "-- Ran when the Component is constructing a new class instance",
+      "function ${1}Component:new(data: components.CreationData<typeof(${1}Component.info)>)",
+      "  local instance = setmetatable({}, ${1})",
+      "",
+      "  return instance",
+      "end",
+      "",
+      "return ${1}Component",
+      ""
+    ],
+    "description": "Quill component using filename as PascalCase class name"
   }
 }
