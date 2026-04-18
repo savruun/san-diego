@@ -17,6 +17,7 @@ default = "https://github.com/UpliftGames/wally-index"
 roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
 sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
 build = ".pesde/scripts/build.luau"
+build-net = '.pesde/scripts/compile_net.luau'
 studio = ".pesde/scripts/studio.luau"
 start = ".pesde/scripts/start.luau"
 
