@@ -6,9 +6,9 @@ const subscribe = charm.subscribe
 const cleanup = vide.cleanup
 
 local function useAtom<T>(atom: charm.Atom<T>): vide.Source<T>
-  const src = source(atom())
+  local src = source(atom())
 
-  const disconnect = subscribe(atom, function(state)
+  local disconnect = subscribe(atom, function(state)
     src(state)
   end)
 
