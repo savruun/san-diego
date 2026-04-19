@@ -6,7 +6,7 @@ for _, mod in paths.interface.components:GetDescendants() do
   components[mod.Name] = require(mod) :: () -> Instance
 end
 
-const function getComponents()
+local function getComponents()
   return components
 end
 

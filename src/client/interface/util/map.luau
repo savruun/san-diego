@@ -1,11 +1,11 @@
-const function map<K, V, U>(source: { [K]: V }, fn: (V, K) -> U)
-  local result = {}
+local function map<K, V, U>(source: { [K]: V }, fn: (V, K) -> U)
+	local result = {}
 
-  for index, value in source do
-    table.insert(result, fn(value, index))
-  end
+	for index, value in source do
+		table.insert(result, fn(value, index))
+	end
 
-  return result
+	return result
 end
 
 return map

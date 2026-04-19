@@ -6,7 +6,7 @@ for _, page in paths.interface.pages:GetChildren() do
   pages[page.Name] = require(page) :: () -> Instance
 end
 
-const function getPages()
+local function getPages()
   return pages
 end 
 
