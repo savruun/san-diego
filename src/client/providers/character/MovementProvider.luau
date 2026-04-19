@@ -1,13 +1,20 @@
 --!strict
 
-local TweenService = game:GetService('TweenService')
+const TweenService = game:GetService('TweenService')
 const ezinput = require('@pkg/ezinput')
+const charm = require('@pkg/charm')
 
 const dependency = require('@pkg/quill_dependencies')
 const constants = require('@shared/constants')
 
+
+const MAX_STAMINA = 100
+const STAMINA_DRAIN_RATE = 15 -- % per sec
+const STAMINA_REGEN_RATE = 10 -- % per sec
+
 const MovementProvider = {
-  isSprinting = false,
+  isSprinting = false, stamina = charm.atom(100),
+
   character = nil :: Model?,
   humanoid = nil :: Humanoid?
 }
@@ -19,14 +26,21 @@ function MovementProvider.start (self: self): ()
   self:_attachInput()
 end
 
+function MovementProvider.on_heartbeat(delta: number): ()
+  if not MovementProvider.isSprinting then return end
+
+  local currentStamina = MovementProvider.stamina()
+  MovementProvider.stamina(currentStamina - (1 * delta))
+end
+
 function MovementProvider.setSprint (self: self, isSprinting: boolean): ()
   if not self.humanoid then return end
   self.isSprinting = isSprinting
 
-  const walkspeed = isSprinting and constants.walkspeed.sprinting or constants.walkspeed.default
-  const fov = isSprinting and constants.fov.sprinting or constants.fov.default
+  local walkspeed = isSprinting and constants.walkspeed.sprinting or constants.walkspeed.default
+  local fov = isSprinting and constants.fov.sprinting or constants.fov.default
 
-  const tween = TweenService:Create(workspace.CurrentCamera, TweenInfo.new(0.1), {
+  local tween = TweenService:Create(workspace.CurrentCamera, TweenInfo.new(0.1), {
     FieldOfView = fov
   })
 
