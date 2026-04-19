@@ -1,22 +1,54 @@
 const Players = game:GetService('Players')
-const player = Players.LocalPlayer
+const Player = Players.LocalPlayer
 
 const vide = require('@pkg/vide')
 const create = vide.create
 const cleanup = vide.cleanup
 const source = vide.source
 
-const function Sidebar()
+const MovementProvider = require('@csingletons/character/MovementProvider')
+const useAtom = require('@ui/util/useAtom')
+
+const function Sidebar(props: { Name: string, Progress: () -> number })
+	const stamina = useAtom(props.Progress)
+
 	return create 'Frame' {
 		Name = 'Sidebar',
-		Size = UDim2.fromScale(1, 1)
+		Size = UDim2.fromScale(.15, 1),
+		BackgroundColor3 = Color3.new(),
+		BackgroundTransparency = .5,
+
+		create 'UICorner' {
+			CornerRadius = UDim.new(.1)
+		},
+
+		create 'Frame' {
+			Name = 'Filler',
+			
+			Size = function()
+				return UDim2.fromScale(1, stamina() / 100)
+			end,
+
+			Position = UDim2.fromScale(.5, 1),
+			AnchorPoint = Vector2.new(.5, 1),
+
+			create 'UIGradient' {
+				Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.new(0.831373, 0.831373, 0.831373)),
+				Rotation = 90
+			},
+
+			create 'UICorner' {
+				CornerRadius = UDim.new(.1)
+			}
+		}
 	}	
 end
 
 const function CharacterSidebarContainer()
 	const humanoidRoot = source(nil)
+	const stamina = MovementProvider.stamina
 
-	const characterAddedConnection = player.CharacterAdded:Connect(function(character)
+	const characterAddedConnection = Player.CharacterAdded:Connect(function(character)
 		humanoidRoot(character:WaitForChild('HumanoidRootPart'))
 	end)
 	
@@ -24,20 +56,31 @@ const function CharacterSidebarContainer()
 		characterAddedConnection:Disconnect()
 	end)
 	
-	if player.Character then
-		humanoidRoot(player.Character:FindFirstChild('HumanoidRootPart'))
+	if Player.Character then
+		humanoidRoot(Player.Character:FindFirstChild('HumanoidRootPart'))
 	end
 
 	return create 'BillboardGui' {
 		Name = 'SidebarContainer',
-		Size = UDim2.fromScale(1, 1),
+		Size = UDim2.fromScale(2, 5),
 		AlwaysOnTop = true,
-		
+		StudsOffset = Vector3.new(3.5),
+
 		Adornee = function()
 			return humanoidRoot() :: BasePart?
 		end,
 
-		Sidebar()
+
+		create 'UIListLayout' {
+			FillDirection = Enum.FillDirection.Horizontal,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			HorizontalAlignment = Enum.HorizontalAlignment.Left
+		},
+
+		Sidebar {
+			Name = 'StaminaBar',
+			Progress = stamina 
+		}
 	}
 end
 
