@@ -2,16 +2,18 @@ const Players = game:GetService('Players')
 const Player = Players.LocalPlayer
 
 const vide = require('@pkg/vide')
+
 const create = vide.create
 const cleanup = vide.cleanup
 const source = vide.source
 
 const MovementProvider = require('@csingletons/character/MovementProvider')
 const useAtom = require('@ui/util/useAtom')
+const constants = require('@shared/constants')
 
-const function Sidebar(props: { Name: string, Progress: () -> number })
-	const stamina = useAtom(props.Progress)
+const MAX_STAMINA = constants.maxStamina
 
+const function Sidebar(props: { Name: string, Stamina: vide.Source<number> })
 	return create 'Frame' {
 		Name = 'Sidebar',
 		Size = UDim2.fromScale(.15, 1),
@@ -26,7 +28,7 @@ const function Sidebar(props: { Name: string, Progress: () -> number })
 			Name = 'Filler',
 			
 			Size = function()
-				return UDim2.fromScale(1, stamina() / 100)
+				return UDim2.fromScale(1, props.Stamina() / 100)
 			end,
 
 			Position = UDim2.fromScale(.5, 1),
@@ -45,10 +47,10 @@ const function Sidebar(props: { Name: string, Progress: () -> number })
 end
 
 const function CharacterSidebarContainer()
-	const humanoidRoot = source(nil)
-	const stamina = MovementProvider.stamina
+	local humanoidRoot = source(nil)
+	local stamina = useAtom(MovementProvider.stamina)
 
-	const characterAddedConnection = Player.CharacterAdded:Connect(function(character)
+	local characterAddedConnection = Player.CharacterAdded:Connect(function(character)
 		humanoidRoot(character:WaitForChild('HumanoidRootPart'))
 	end)
 	
@@ -70,6 +72,10 @@ const function CharacterSidebarContainer()
 			return humanoidRoot() :: BasePart?
 		end,
 
+		Enabled = function()
+			return stamina() < MAX_STAMINA
+		end,
+
 
 		create 'UIListLayout' {
 			FillDirection = Enum.FillDirection.Horizontal,
@@ -79,7 +85,7 @@ const function CharacterSidebarContainer()
 
 		Sidebar {
 			Name = 'StaminaBar',
-			Progress = stamina 
+			Stamina = stamina 
 		}
 	}
 end
