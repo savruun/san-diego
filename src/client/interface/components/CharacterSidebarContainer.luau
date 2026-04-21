@@ -8,7 +8,7 @@ const cleanup = vide.cleanup
 const source = vide.source
 
 const MovementProvider = require('@csingletons/character/MovementProvider')
-const useAtom = require('@ui/util/useAtom')
+const useAtom = require('@ui/hooks/useAtom')
 const constants = require('@shared/constants')
 
 const MAX_STAMINA = constants.maxStamina
