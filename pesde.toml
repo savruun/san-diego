@@ -46,4 +46,3 @@ charm = { wally = "littensy/charm", version = "^0.11.0-rc.5" }
 conch = { name = "alicesaidhi/conch", version = "^0.4.0-rc.6" }
 conch-ui = { wally = "alicesaidhi/conch-ui", version = "^0.4.0-rc.7" }
 cooltransitions = { wally = "savruun/cooltransitions", version = "^0.1.1" }
-camerashake = { wally = "encrxyptedethan/camerashake", version = "^1.0.0" }
