@@ -1,7 +1,9 @@
 local HttpService = game:GetService("HttpService")
 const RunService = game:GetService('RunService')
 
-const CameraShakerMode = table.freeze {
+const spring = require('@pkg/spring')
+
+const ApplicationMode = table.freeze {
   --[[
     Manual Application mode, you have to physically apply the shake impulse.
     Allows for modification of the CFrame before application to the Camera.
@@ -15,11 +17,11 @@ const CameraShakerMode = table.freeze {
 }
 
 const CameraShaker = {
-  CameraShakerMode = CameraShakerMode
+  ApplicationMode = ApplicationMode
 }
 
 export type self = typeof(CameraShaker)
-export type CameraShakerMode = typeof(CameraShakerMode)
+export type ApplicationMode = typeof(ApplicationMode)
 
 --[[
   Creates a new CameraShaker.
@@ -27,14 +29,20 @@ export type CameraShakerMode = typeof(CameraShakerMode)
   @param mode The mode to create the CameraShaker in, defaults to AutomaticApplication.
   @return CameraShaker Instance
 ]]
-function CameraShaker.new(camera: Camera?, mode: CameraShakerMode?): self
+function CameraShaker.new(camera: Camera?, applicationMode: ApplicationMode?): self
   local self = setmetatable({}, { __index = CameraShaker })
 
   self.__uuid = HttpService:GenerateGUID()
-  self.__mode = mode or CameraShakerMode.AutomaticApplication
+  self.__mode = applicationMode or ApplicationMode.AutomaticApplication
   self.__camera = camera or workspace.CurrentCamera
 
-  if self.__mode == CameraShakerMode.AutomaticApplication then
+  self.__spring = spring.new(
+	  Vector2.new(),
+	  0.08,
+	  math.huge
+  )
+
+  if self.__mode == ApplicationMode.AutomaticApplication then
     RunService:BindToRenderStep(`camera-shaker-{self.__uuid}`, Enum.RenderPriority.Camera.Value + 1, function(delta)
       self:__applyShake(delta)
     end)
@@ -48,7 +56,7 @@ end
   @param self The CameraShaker Instance.
   @param impulse The impulse CFrame to apply to the camera.
 ]]
-function CameraShaker.applyImpulse(self: self, impulse: CFrame): ()
+function CameraShaker.applyImpulse(self: self, impulse: Vector2): ()
   
 end
 
