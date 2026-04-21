@@ -25,3 +25,4 @@ function Timer.destroy(self: Timer)
 end
 
 return Timer
+ 
