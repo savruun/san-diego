@@ -2,7 +2,7 @@ option ServerOutput = "src/server/net"
 option ClientOutput = "src/client/net"
 
 struct GunFireData {
-  firedAt: f32,
+  type: string,
   position: vector
 }
 
