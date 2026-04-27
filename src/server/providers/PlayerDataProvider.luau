@@ -1,86 +1,117 @@
-const Players = game:GetService('Players')
-const charm = require('@pkg/charm')
+const Players = game:GetService("Players")
 
-const profilestore = require('@spkg/profilestore')
-const PLAYER_DATA_TEMPLATE = require('@shared/lib/data/playerDataTemplate')
-const playerUtility = require('@shared/lib/playerUtility')
+const charm = require("@pkg/charm")
+const profilestore = require("@spkg/profilestore")
 
-const metadata = require('@server/meta')
+const signal = require("@shared/lib/Signal")
+const PLAYER_DATA_TEMPLATE = require("@shared/lib/data/playerDataTemplate")
+const playerUtility = require("@shared/lib/playerUtility")
+
+const metadata = require("@server/meta")
+
 local playerMeta = metadata.players
 
-const playerStore = profilestore.New('PlayerData', PLAYER_DATA_TEMPLATE)
-local profiles: { [number]: typeof(playerStore:StartSessionAsync()) } = {}
+const playerStore = profilestore.New("PlayerData", PLAYER_DATA_TEMPLATE)
+
+type Profile = typeof(playerStore:StartSessionAsync("0"))
+
+local profiles: { [number]: Profile } = {}
 local cleanups: { [number]: () -> () } = {}
 
-const PlayerDataProvider = {}
+const PlayerDataProvider = {
+	dropPlayerData = signal.new<<(Player)>>(),
+}
 
 function PlayerDataProvider.start(self: self)
-  playerUtility:forEachPlayer(function(player: Player)
-    self:playerAdded(player)
-  end)
+	playerUtility:forEachPlayer(function(player: Player)
+		self:playerAdded(player)
+	end)
 
-  Players.PlayerRemoving:Connect(function(player, exitReason)
-    self:playerRemoving(player, exitReason)
-  end)
+	Players.PlayerRemoving:Connect(function(player: Player, exitReason: Enum.PlayerExitReason)
+		self:playerRemoving(player, exitReason)
+	end)
 end
 
-function PlayerDataProvider.getProfile(self: self, player: Player)
-  return profiles[player.UserId]  
+function PlayerDataProvider.getProfile(self: self, player: Player): Profile?
+	return profiles[player.UserId]
 end
 
 function PlayerDataProvider.getData(self: self, player: Player)
-  return self:getProfile(player).Data
+	local profile = self:getProfile(player)
+	return profile and profile.Data
 end
 
 function PlayerDataProvider.createPlayerProfile(self: self, player: Player)
-  const profile = playerStore:StartSessionAsync(`{player.UserId}`, {
-    Cancel = function()
-      return player.Parent ~= Players
-    end
-  })
+	local profile = playerStore:StartSessionAsync(`{player.UserId}`, {
+		Cancel = function()
+			return player.Parent ~= Players
+		end,
+	})
 
-  if profile ~= nil then
-    profile:AddUserId(player.UserId)
-    profile:Reconcile()
+	if not profile then
+		player:Kick("Profile failed to load. Please rejoin.")
+		return
+	end
 
-    profile.OnSessionEnd:Connect(function()
-      profiles[player.UserId] = nil
-      player:Kick('Profile session end - please rejoin.')
-    end)
+	profile:AddUserId(player.UserId)
+	profile:Reconcile()
 
-    if player.Parent == Players then
-      profiles[player.UserId] = profile
-      print(profiles[player.UserId])
-    else
-      profile:EndSession()
-    end
-  else
-    player:Kick('Profile load fail - please rejoin.')
-  end
+	profile.OnSessionEnd:Connect(function()
+		profiles[player.UserId] = nil
+
+		if player.Parent == Players then
+			player:Kick("Profile session ended. Please rejoin.")
+		end
+	end)
+
+	if player.Parent == Players then
+		profiles[player.UserId] = profile
+	else
+		profile:EndSession()
+	end
 end
 
 function PlayerDataProvider.playerAdded(self: self, player: Player)
-  self:createPlayerProfile(player)
+	self:createPlayerProfile(player)
 
-  local dataAtom = charm.atom(profiles[player.UserId].Data)
+	local profile = profiles[player.UserId]
+	if not profile then
+		return
+	end
 
-  playerMeta[player.UserId] = {}
-  playerMeta[player.UserId].data = dataAtom
+	local dataAtom = charm.atom(profile.Data)
 
-  cleanups[player.UserId] = charm.subscribe(dataAtom, function(data)
-    profiles[player.UserId] = data
-  end)
+	playerMeta[player.UserId] = {
+		data = dataAtom,
+	}
+
+	cleanups[player.UserId] = charm.subscribe(dataAtom, function(data)
+		profile.Data = data
+	end)
 end
 
-function PlayerDataProvider.playerRemoving(self: self, player: Player, exitReason: Enum.PlayerExitReason)
-  const profile = profiles[player]
-  if not profile then return end
+function PlayerDataProvider.playerRemoving(
+	self: self,
+	player: Player,
+	_exitReason: Enum.PlayerExitReason
+)
+	local userId = player.UserId
 
-  profile:EndSession()
-  profiles[player.UserId] = nil
-  
-  local cleanup = cleanups[player.UserId]
-  if cleanup then cleanup() end
+	local profile = profiles[userId]
+	if not profile then return end
+
+	local cleanup = cleanups[userId]
+
+	if cleanup ~= nil then
+		cleanup()
+		cleanups[userId] = nil
+	end
+
+	self.dropPlayerData:Fire(player)
+
+	profile:EndSession()
+	profiles[userId] = nil
+	playerMeta[userId] = nil
 end
 
 export type self = typeof(PlayerDataProvider)

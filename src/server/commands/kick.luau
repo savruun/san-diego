@@ -1,16 +1,16 @@
-const conch = require('@pkg/conch')
+const Conch = require("@pkg/conch")
 
-const KickCommand = conch.register('kick', {
-	description = 'Kicks a player from the server',
-	permissions = { 'use_kick' },
+const KickCommand = Conch.register("kick", {
+	description = "Kicks a player from the server",
+	permissions = { "use_kick" },
 
 	arguments = function()
-		return conch.args.player('player', 'The player to kick.'),
-			conch.args.opt(conch.args.string('reason', 'The reason for kicking the player.'))
+		return Conch.args.player("player", "The player to kick."),
+			Conch.args.opt(Conch.args.string("reason", "The reason for kicking the player."))
 	end,
 
 	callback = function(player: Player, reason: string?)
-		player:Kick(reason or 'You have been kicked by a game moderator.')
+		player:Kick(reason or "You have been kicked by a game moderator.")
 	end,
 })
 

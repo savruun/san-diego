@@ -1,6 +1,6 @@
-const RunService = game:GetService('RunService')
+const RunService = game:GetService("RunService")
 
-const vide = require('@pkg/vide')
+const vide = require("@pkg/vide")
 const cleanup = vide.cleanup
 
 local function useLerp(initial: number, goal: number, alpha: number)

@@ -1,6 +1,6 @@
 --!strict
 
-const ReplicatedStorage = game:GetService('ReplicatedStorage')
+const ReplicatedStorage = game:GetService("ReplicatedStorage")
 const Pkg = ReplicatedStorage.packages
 
 const signal = require(Pkg.signal)

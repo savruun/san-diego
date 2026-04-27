@@ -162,16 +162,17 @@ local Queue: any = {
 local SerdesEvent = "?"
 local SerdesThread: thread?
 Queue.Reliable[0] = table.create(256)
-export type GunFireData = { firedAt: number, position: Vector3 }
+export type GunFireData = { type: string, position: Vector3 }
 export type BulletRenderData = { position: Vector3, hit: Vector3, type: string, time: number }
-function SerdesFunctions.ReadEVENT_FireGun(): ({ firedAt: number, position: Vector3 })
-	-- Read BLOCK: 16 bytes
-	local BLOCK_START = Read(16)
+function SerdesFunctions.ReadEVENT_FireGun(): ({ type: string, position: Vector3 })
+	-- Read BLOCK: 14 bytes
+	local BLOCK_START = Read(14)
 	local Value = {} :: any
-	Value.firedAt = buffer.readf32(RecieveBuffer, BLOCK_START + 0)
-	local X = buffer.readf32(RecieveBuffer, BLOCK_START + 4)
-	local Y = buffer.readf32(RecieveBuffer, BLOCK_START + 8)
-	local Z = buffer.readf32(RecieveBuffer, BLOCK_START + 12)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
+	Value.type = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	local X = buffer.readf32(RecieveBuffer, BLOCK_START + 2)
+	local Y = buffer.readf32(RecieveBuffer, BLOCK_START + 6)
+	local Z = buffer.readf32(RecieveBuffer, BLOCK_START + 10)
 	Value.position = Vector3.new(X, Y, Z)
 	return Value
 end
@@ -270,7 +271,7 @@ Reliable.OnServerEvent:Connect(function(Player: Player, Buffer: buffer, Instance
 		local BLOCK_START = Read(1)
 		local Index = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
 		if Index == 0 then
-			local Value: { firedAt: number, position: Vector3 } = SerdesFunctions.ReadEVENT_FireGun()
+			local Value: { type: string, position: Vector3 } = SerdesFunctions.ReadEVENT_FireGun()
 			if Events.Reliable[0] ~= nil then
 				task.spawn(Events.Reliable[0], Player, Value)
 			else
@@ -305,7 +306,7 @@ local Returns = table.freeze({
 	StepReplication = StepReplication,
 
 	FireGun = {
-		On = function(Listener: (Player: Player, Value: { firedAt: number, position: Vector3 }) -> ()): () -> ()
+		On = function(Listener: (Player: Player, Value: { type: string, position: Vector3 }) -> ()): () -> ()
 			Events.Reliable[0] = Listener
 			for Index, Arguments in Queue.Reliable[0] do
 				task.spawn(Listener, table.unpack(Arguments))

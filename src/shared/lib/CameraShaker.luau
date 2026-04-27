@@ -1,19 +1,19 @@
 local HttpService = game:GetService("HttpService")
-const RunService = game:GetService('RunService')
+const RunService = game:GetService("RunService")
 
-const spring = require('@pkg/spring')
+const spring = require("@pkg/spring")
 
 const ApplicationMode = table.freeze {
   --[[
     Manual Application mode, you have to physically apply the shake impulse.
     Allows for modification of the CFrame before application to the Camera.
   ]]
-  ManualApplication = 'Manual',
+  ManualApplication = "Manual",
 
   --[[
     Automatic Application mode, CameraShaker will apply the shake impulses for you.
   ]]
-  AutomaticApplication = 'Automatic'
+  AutomaticApplication = "Automatic"
 }
 
 const CameraShaker = {

@@ -161,17 +161,20 @@ local Queue: any = {
 local SerdesEvent = "?"
 local SerdesThread: thread?
 Queue.Reliable[1] = table.create(256)
-export type GunFireData = { firedAt: number, position: Vector3 }
+export type GunFireData = { type: string, position: Vector3 }
 export type BulletRenderData = { position: Vector3, hit: Vector3, type: string, time: number }
-function SerdesFunctions.WriteEVENT_FireGun(Value: { firedAt: number, position: Vector3 }): ()
-	-- Allocate BLOCK: 17 bytes
-	local BLOCK_START = Allocate(17)
+function SerdesFunctions.WriteEVENT_FireGun(Value: { type: string, position: Vector3 }): ()
+	-- Allocate BLOCK: 15 bytes
+	local BLOCK_START = Allocate(15)
 	buffer.writeu8(SendBuffer, BLOCK_START + 0, 0)
-	buffer.writef32(SendBuffer, BLOCK_START + 1, Value.firedAt)
+	local Length = #Value.type
+	buffer.writeu16(SendBuffer, BLOCK_START + 1, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value.type, Length)
 	local Vector = Value.position
-	buffer.writef32(SendBuffer, BLOCK_START + 5, Vector.X)
-	buffer.writef32(SendBuffer, BLOCK_START + 9, Vector.Y)
-	buffer.writef32(SendBuffer, BLOCK_START + 13, Vector.Z)
+	buffer.writef32(SendBuffer, BLOCK_START + 3, Vector.X)
+	buffer.writef32(SendBuffer, BLOCK_START + 7, Vector.Y)
+	buffer.writef32(SendBuffer, BLOCK_START + 11, Vector.Z)
 end
 
 function SerdesFunctions.ReadEVENT_RenderBullet(): ({ position: Vector3, hit: Vector3, type: string, time: number })
@@ -279,7 +282,7 @@ local Returns = table.freeze({
 	StepReplication = StepReplication,
 
 	FireGun = {
-		Fire = function(Value: { firedAt: number, position: Vector3 }): ()
+		Fire = function(Value: { type: string, position: Vector3 }): ()
 			SerdesFunctions.WriteEVENT_FireGun(Value)
 		end
 	},
