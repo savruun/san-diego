@@ -1,7 +1,7 @@
 --!strict
 
 const Players = game:GetService("Players")
-const player = Players.LocalPlayer
+const Player = Players.LocalPlayer
 
 const Signal = require("@shared/lib/Signal")
 
@@ -12,10 +12,10 @@ const CharacterProvider = {
 }
 
 function CharacterProvider.start(self: self): ()
-  self.character = player.Character
+  self.character = Player.Character
   self.humanoid = self.character and self.character:FindFirstChildOfClass("Humanoid")
 
-  player.CharacterAdded:Connect(function(char): ()
+  Player.CharacterAdded:Connect(function(char): ()
     self.character = char
     self.humanoid = char:WaitForChild("Humanoid") :: Humanoid
     self.spawned:Fire(self.character :: Model, self.humanoid :: Humanoid)

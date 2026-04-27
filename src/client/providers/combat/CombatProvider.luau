@@ -71,7 +71,7 @@ function CombatProvider.renderBullet(self: self, fireData: FireData): ()
         particle:Emit(3)
       end
 
-      Debris:AddItem(impact, .5)
+      Debris:AddItem(Impact, .5)
       return
     end
 

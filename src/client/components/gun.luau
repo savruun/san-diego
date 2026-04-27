@@ -1,10 +1,9 @@
 --!strict
 
-const components = require("@pkg/quill_rblx_components")
-const dependency = require("@pkg/quill_dependencies")
+const Components = require("@pkg/quill_rblx_components")
 
-const trove = require("@pkg/trove")
-local ezinput = require("@pkg/ezinput")
+const Trove = require("@pkg/trove")
+const EzInput = require("@pkg/ezinput")
 
 const getAimDirection = require("@shared/lib/getAimDirection")
 const net = require("@client/net")
@@ -17,9 +16,9 @@ type GunProperties = {
   instance: Tool,
   handle: BasePart,
   tip: Attachment,
-  trove: trove.Trove,
-  input: ezinput.ContextBuilder,
-  equippedTrove: trove.Trove?
+  trove: Trove.Trove,
+  input: EzInput.ContextBuilder,
+  equippedTrove: Trove.Trove?
 }
 
 export type self = setmetatable<GunProperties, typeof(Gun)>
@@ -34,7 +33,7 @@ function Gun.init(self: self): ()
 
   self.trove:Add(self.instance.Equipped:Connect(function()
     self.equippedTrove = self.trove:Extend()
-    self.input = ezinput.context("gun")
+    self.input = EzInput.context("gun")
 
     self:__attachInput()
   end))
@@ -103,25 +102,25 @@ end
 const GunComponent = {}
 
 -- Contains info such as filters
-GunComponent.info = components.info {
-  is = components.singleton("Tool"),
-  tag = components.singleton("Gun"),
+GunComponent.info = Components.info {
+  is = Components.singleton("Tool"),
+  tag = Components.singleton("Gun"),
 
   children = {
-    Handle = components.child("BasePart"),
-    Tip = components.child("Attachment")
+    Handle = Components.child("BasePart"),
+    Tip = Components.child("Attachment")
   }
 }
 
 -- Ran when the Component is constructing a new class instance
-function GunComponent:new(data: components.CreationData<typeof(GunComponent.info)>): self
+function GunComponent:new(data: Components.CreationData<typeof(GunComponent.info)>): self
   local gun = setmetatable({}, Gun) :: self
 
   gun.instance = data.instance :: Tool
   gun.handle = data.children.Handle
   gun.tip = data.children.Tip
 
-  gun.trove = trove.new()
+  gun.trove = Trove.new()
 
   return gun
 end

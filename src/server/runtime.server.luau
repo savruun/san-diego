@@ -1,8 +1,9 @@
 const ServerScriptService = game:GetService("ServerScriptService")
-const component = require("@pkg/quill_rblx_components")
-const dependency = require("@pkg/quill_dependencies")
-const quill = require("@pkg/quill_core")
-const lifecycles = require("@pkg/quill_rblx_lifecycles")
+
+const Component = require("@pkg/quill_rblx_components")
+const Dependency = require("@pkg/quill_dependencies")
+const Quill = require("@pkg/quill_core")
+const Lifecycles = require("@pkg/quill_rblx_lifecycles")
 
 const function getModules(): { ModuleScript }
 	const descendants = ServerScriptService.server.providers:GetDescendants()
@@ -16,4 +17,4 @@ const function getModules(): { ModuleScript }
 	return modules
 end
 
-quill.new():with_modules(getModules()):with_mod(component.mod()):with_mod(lifecycles.mod()):with_mod(dependency.mod()):write()
+Quill.new():with_modules(getModules()):with_mod(Component.mod()):with_mod(Lifecycles.mod()):with_mod(Dependency.mod()):write()

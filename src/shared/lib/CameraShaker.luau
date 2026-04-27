@@ -1,7 +1,7 @@
-local HttpService = game:GetService("HttpService")
+const HttpService = game:GetService("HttpService")
 const RunService = game:GetService("RunService")
 
-const spring = require("@pkg/spring")
+const Spring = require("@pkg/spring")
 
 const ApplicationMode = table.freeze {
   --[[
@@ -36,7 +36,7 @@ function CameraShaker.new(camera: Camera?, applicationMode: ApplicationMode?): s
   self.__mode = applicationMode or ApplicationMode.AutomaticApplication
   self.__camera = camera or workspace.CurrentCamera
 
-  self.__spring = spring.new(
+  self.__spring = Spring.new(
 	  Vector2.new(),
 	  0.08,
 	  math.huge

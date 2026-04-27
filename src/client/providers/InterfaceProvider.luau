@@ -4,12 +4,14 @@
 const Players = game:GetService("Players")
 
 const App = require("@ui/components/App")
-const vide = require("@pkg/vide")
-local paths = require("@shared/paths")
-const charm = require("@pkg/charm")
+const Vide = require("@pkg/vide")
+const Charm = require("@pkg/charm")
 
-const atom = charm.atom
-const player = Players.LocalPlayer
+const paths = require("@shared/paths")
+
+const Player = Players.LocalPlayer
+const atom = Charm.atom
+
 
 const InterfaceProvider = {
 	__rootCleanup = function() end,
@@ -18,9 +20,9 @@ const InterfaceProvider = {
 }
 
 function InterfaceProvider.start(self: self): ()
-	const playerGui = player:WaitForChild("PlayerGui")
+	const playerGui = Player:WaitForChild("PlayerGui")
 
-	self.__rootCleanup = vide.mount(function()
+	self.__rootCleanup = Vide.mount(function()
 		return App(self.page, self.mountedComponents)
 	end, playerGui)
 

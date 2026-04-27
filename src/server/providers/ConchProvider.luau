@@ -2,13 +2,13 @@
 const ServerScriptService = game:GetService("ServerScriptService")
 
 const Conch = require("@pkg/conch")
-const playerUtility = require("@shared/lib/playerUtility")
-const logger = require("@pkg/quill_logger")
+const Logger = require("@pkg/quill_logger")
 
+const playerUtility = require("@shared/lib/playerUtility")
 const commandsFolder = ServerScriptService.server.commands
 
 const ConchProvider = {
-	__logger = logger.new(script.Name, function(logged) end),
+	__logger = Logger.new(script.Name, function(logged) end),
 }
 
 function ConchProvider.start(self: self)

@@ -1,5 +1,5 @@
-const dependency = require("@pkg/quill_dependencies")
-const net = require("@server/net")
+const Dependency = require("@pkg/quill_dependencies")
+const Net = require("@server/net")
 
 type WeaponStateMap = {
   [number]: {
@@ -9,17 +9,17 @@ type WeaponStateMap = {
 }
 
 const CombatProvider = {
-  PlayerDataProvider = dependency.use(require("@ssingletons/PlayerDataProvider")),
+  PlayerDataProvider = Dependency.use(require("@ssingletons/PlayerDataProvider")),
   weaponState = {} :: WeaponStateMap
 }
 
 function CombatProvider.start(self: self)
-  net.FireGun.On(function(player, data)
+  Net.FireGun.On(function(player, data)
     self:gunFired(player, data)
   end)
 end
 
-function CombatProvider.gunFired(self: self, player: Player, data: net.GunFireData)
+function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireData)
   print("gun fire recieved")
 end
 

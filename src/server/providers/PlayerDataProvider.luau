@@ -1,25 +1,23 @@
 const Players = game:GetService("Players")
 
-const charm = require("@pkg/charm")
-const profilestore = require("@spkg/profilestore")
+const Charm = require("@pkg/charm")
+const ProfileStore = require("@spkg/profilestore")
 
-const signal = require("@shared/lib/Signal")
+const Signal = require("@shared/lib/Signal")
 const PLAYER_DATA_TEMPLATE = require("@shared/lib/data/playerDataTemplate")
 const playerUtility = require("@shared/lib/playerUtility")
 
 const metadata = require("@server/meta")
-
 local playerMeta = metadata.players
 
-const playerStore = profilestore.New("PlayerData", PLAYER_DATA_TEMPLATE)
-
-type Profile = typeof(playerStore:StartSessionAsync("0"))
+const playerStore = ProfileStore.New("PlayerData", PLAYER_DATA_TEMPLATE :: any)
+type Profile = typeof(playerStore:StartSessionAsync("0", {}))
 
 local profiles: { [number]: Profile } = {}
 local cleanups: { [number]: () -> () } = {}
 
 const PlayerDataProvider = {
-	dropPlayerData = signal.new<<(Player)>>(),
+	dropPlayerData = Signal.new<<(Player)>>(),
 }
 
 function PlayerDataProvider.start(self: self)
@@ -79,13 +77,13 @@ function PlayerDataProvider.playerAdded(self: self, player: Player)
 		return
 	end
 
-	local dataAtom = charm.atom(profile.Data)
+	local dataAtom = Charm.atom<<typeof(PLAYER_DATA_TEMPLATE)>>(profile.Data)
 
 	playerMeta[player.UserId] = {
 		data = dataAtom,
 	}
 
-	cleanups[player.UserId] = charm.subscribe(dataAtom, function(data)
+	cleanups[player.UserId] = Charm.subscribe(dataAtom, function(data)
 		profile.Data = data
 	end)
 end

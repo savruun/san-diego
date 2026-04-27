@@ -6,7 +6,7 @@ type MetaData = {
   server: {}
 }
 
-const metadata = {
+const metadata: MetaData = {
   players = {},
   server = {}
 }

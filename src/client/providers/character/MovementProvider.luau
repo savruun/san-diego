@@ -1,8 +1,8 @@
 --!strict
 
 const TweenService = game:GetService("TweenService")
-const ezinput = require("@pkg/ezinput")
-const charm = require("@pkg/charm")
+const EzInput = require("@pkg/ezinput")
+const Charm = require("@pkg/charm")
 
 const dependency = require("@pkg/quill_dependencies")
 const constants = require("@shared/constants")
@@ -14,7 +14,7 @@ const STAMINA_REGEN_RATE = constants.stamina.regenRate
 const SPRINT_COOLDOWN = constants.sprintCooldown
 
 const MovementProvider = {
-  isSprinting = false, stamina = charm.atom(MAX_STAMINA),
+  isSprinting = false, stamina = Charm.atom(MAX_STAMINA),
   sprintCooldownTimer = nil :: timer.Timer?,
   character = nil :: Model?,
   humanoid = nil :: Humanoid?
@@ -123,7 +123,7 @@ end
   Attaches appropriate listeners to input
 ]]
 function MovementProvider._attachInput (self: self): ()
-  ezinput.context("player"):action("sprint"):bind(Enum.KeyCode.LeftShift):action():onPressed(function()
+  EzInput.context("player"):action("sprint"):bind(Enum.KeyCode.LeftShift):action():onPressed(function()
     if self:isSprintOnCooldown() then return end -- Do not let the user sprint if sprint on cooldown
     self:setSprint(true)
   end):onReleased(function()
