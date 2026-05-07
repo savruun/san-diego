@@ -1,8 +1,8 @@
-const paths = require("@shared/paths")
+const paths = require('@shared/paths')
 
 local components = {}
 for _, mod in paths.interface.components:GetDescendants() do
-  if not mod:IsA("ModuleScript") or mod.Name == "App" then continue end
+  if not mod:IsA('ModuleScript') or mod.Name == 'App' then continue end
   components[mod.Name] = require(mod) :: () -> Instance
 end
 

@@ -1,27 +1,28 @@
-const Players = game:GetService("Players")
+const Players = game:GetService('Players')
 
-const Charm = require("@pkg/charm")
-const ProfileStore = require("@spkg/profilestore")
+const Charm = require('@pkg/charm')
+const ProfileStore = require('@spkg/profilestore')
 
-const Signal = require("@shared/lib/Signal")
-const PLAYER_DATA_TEMPLATE = require("@shared/lib/data/playerDataTemplate")
-const playerUtility = require("@shared/lib/playerUtility")
+const Signal = require('@shared/lib/Signal')
+const PLAYER_DATA_TEMPLATE = require('@shared/lib/data/playerDataTemplate')
+const PlayerUtility = require('@shared/lib/playerUtility')
 
-const metadata = require("@server/meta")
+const metadata = require('@server/meta')
 local playerMeta = metadata.players
 
-const playerStore = ProfileStore.New("PlayerData", PLAYER_DATA_TEMPLATE :: any)
-type Profile = typeof(playerStore:StartSessionAsync("0", {}))
+const playerStore = ProfileStore.New('PlayerData', PLAYER_DATA_TEMPLATE :: any)
+type Profile = typeof(playerStore:StartSessionAsync('0', {}))
 
 local profiles: { [number]: Profile } = {}
 local cleanups: { [number]: () -> () } = {}
 
 const PlayerDataProvider = {
-	dropPlayerData = Signal.new<<(Player)>>(),
+	DropPlayerData = Signal.new<<(Player)>>(),
+	InitializePlayerData = Signal.new<<(Player, Charm.Atom<typeof(PLAYER_DATA_TEMPLATE)>)>>()
 }
 
 function PlayerDataProvider.start(self: self)
-	playerUtility:forEachPlayer(function(player: Player)
+	PlayerUtility:forEachPlayer(function(player: Player)
 		self:playerAdded(player)
 	end)
 
@@ -47,7 +48,7 @@ function PlayerDataProvider.createPlayerProfile(self: self, player: Player)
 	})
 
 	if not profile then
-		player:Kick("Profile failed to load. Please rejoin.")
+		player:Kick('Profile failed to load. Please rejoin.')
 		return
 	end
 
@@ -58,7 +59,7 @@ function PlayerDataProvider.createPlayerProfile(self: self, player: Player)
 		profiles[player.UserId] = nil
 
 		if player.Parent == Players then
-			player:Kick("Profile session ended. Please rejoin.")
+			player:Kick('Profile session ended. Please rejoin.')
 		end
 	end)
 
@@ -86,6 +87,9 @@ function PlayerDataProvider.playerAdded(self: self, player: Player)
 	cleanups[player.UserId] = Charm.subscribe(dataAtom, function(data)
 		profile.Data = data
 	end)
+
+	-- Fire to all subscribers that player data should be initialized
+	self.InitializePlayerData:Fire(player, dataAtom)
 end
 
 function PlayerDataProvider.playerRemoving(

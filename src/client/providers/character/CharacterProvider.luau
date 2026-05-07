@@ -1,9 +1,9 @@
 --!strict
 
-const Players = game:GetService("Players")
+const Players = game:GetService('Players')
 const Player = Players.LocalPlayer
 
-const Signal = require("@shared/lib/Signal")
+const Signal = require('@shared/lib/Signal')
 
 const CharacterProvider = {
   character = nil :: Model?,
@@ -13,11 +13,11 @@ const CharacterProvider = {
 
 function CharacterProvider.start(self: self): ()
   self.character = Player.Character
-  self.humanoid = self.character and self.character:FindFirstChildOfClass("Humanoid")
+  self.humanoid = self.character and self.character:FindFirstChildOfClass('Humanoid')
 
   Player.CharacterAdded:Connect(function(char): ()
     self.character = char
-    self.humanoid = char:WaitForChild("Humanoid") :: Humanoid
+    self.humanoid = char:WaitForChild('Humanoid') :: Humanoid
     self.spawned:Fire(self.character :: Model, self.humanoid :: Humanoid)
   end)
 end

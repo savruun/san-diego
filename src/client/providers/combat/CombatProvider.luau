@@ -1,9 +1,9 @@
 --!strict
 
-const Debris = game:GetService("Debris")
-const ReplicatedStorage = game:GetService("ReplicatedStorage")
-const RunService = game:GetService("RunService")
-const Players = game:GetService("Players")
+const Debris = game:GetService('Debris')
+const ReplicatedStorage = game:GetService('ReplicatedStorage')
+const RunService = game:GetService('RunService')
+const Players = game:GetService('Players')
 
 const Player = Players.LocalPlayer
 
@@ -11,8 +11,8 @@ const VFX = ReplicatedStorage.assets.vfx
 const Bullet = VFX.Bullet
 const Impact = VFX.BulletImpact
 
-const BulletContainer = Instance.new("Folder")
-BulletContainer.Name = "BulletContainer"
+const BulletContainer = Instance.new('Folder')
+BulletContainer.Name = 'BulletContainer'
 BulletContainer.Parent = workspace
 
 type FireData = {
@@ -32,7 +32,7 @@ function CombatProvider.renderBullet(self: self, fireData: FireData): ()
   bullet.Position = fireData.position
 
   local velocity = fireData.direction.Unit * fireData.velocity
-  local gravity = Vector3.new(0, -workspace.Gravity * .1, 0)
+  local gravity = Vector3.new(0, -workspace.Gravity * .07, 0)
 
   local lastPosition = fireData.position
 
@@ -67,11 +67,11 @@ function CombatProvider.renderBullet(self: self, fireData: FireData): ()
       impact.CFrame = CFrame.lookAt(pos, pos + forward, up)
 
       for _, particle: ParticleEmitter in impact:GetChildren() do
-        if not particle:IsA("ParticleEmitter") then continue end
+        if not particle:IsA('ParticleEmitter') then continue end
         particle:Emit(3)
       end
 
-      Debris:AddItem(Impact, .5)
+      Debris:AddItem(impact, .5)
       return
     end
 

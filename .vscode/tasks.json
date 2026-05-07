@@ -4,6 +4,15 @@
     {
       "label": "Rojo Dev",
       "type": "shell",
+      "options": {
+        "shell": {
+          "executable": "/usr/bin/zsh",
+          "args": [
+            "-i",
+            "-c"
+          ]
+        }
+      },
       "command": "pesde run start",
       "presentation": {
         "panel": "dedicated",
@@ -14,6 +23,15 @@
     {
       "label": "Roblox Studio",
       "type": "shell",
+      "options": {
+        "shell": {
+          "executable": "/usr/bin/zsh",
+          "args": [
+            "-i",
+            "-c"
+          ]
+        }
+      },
       "command": "pesde run studio",
       "presentation": {
         "panel": "dedicated",

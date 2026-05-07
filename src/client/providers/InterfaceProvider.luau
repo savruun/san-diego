@@ -1,13 +1,13 @@
 --!strict
 
 -- Services
-const Players = game:GetService("Players")
+const Players = game:GetService('Players')
 
-const App = require("@ui/components/App")
-const Vide = require("@pkg/vide")
-const Charm = require("@pkg/charm")
+const App = require('@ui/components/App')
+const Vide = require('@pkg/vide')
+const Charm = require('@pkg/charm')
 
-const paths = require("@shared/paths")
+const paths = require('@shared/paths')
 
 const Player = Players.LocalPlayer
 const atom = Charm.atom
@@ -20,7 +20,7 @@ const InterfaceProvider = {
 }
 
 function InterfaceProvider.start(self: self): ()
-	const playerGui = Player:WaitForChild("PlayerGui")
+	const playerGui = Player:WaitForChild('PlayerGui')
 
 	self.__rootCleanup = Vide.mount(function()
 		return App(self.page, self.mountedComponents)
@@ -35,7 +35,7 @@ end
 function InterfaceProvider.mountComponent(self: self, componentName: string): ()
 	local componentExists = paths.interface.components:FindFirstChild(componentName) ~= nil
 	if not componentExists then
-		return warn("No component exists with name ", componentName)
+		return warn('No component exists with name ', componentName)
 	end
 	
 	local currentValue = self.mountedComponents()
@@ -63,7 +63,7 @@ end
 function InterfaceProvider.setPage(self: self, pageName: string): ()
 	local pageExists = paths.interface.pages:FindFirstChild(pageName) ~= nil
 	if not pageExists then
-		return warn("No page with name ", pageName)
+		return warn('No page with name ', pageName)
 	end
 
 	self.page(pageName)
@@ -75,8 +75,8 @@ function InterfaceProvider.cleanup(self: self) self.__rootCleanup() end
 	Sets the InterfaceProvider properties to their default values
 ]]
 function InterfaceProvider.__setDefaultValues(self: self)
-	self.page("HUD")
-	self.mountedComponents({ "CharacterSidebarContainer" })
+	self.page('HUD')
+	self.mountedComponents({ 'CharacterSidebarContainer' })
 end
 
 export type self = typeof(InterfaceProvider)

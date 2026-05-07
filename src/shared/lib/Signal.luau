@@ -11,7 +11,7 @@ export type Signal<T...> = {
 
 function Signal.new<T...>(): Signal<T...>
 	local self = setmetatable({}, Signal)
-  self.__event = Instance.new("BindableEvent")
+  self.__event = Instance.new('BindableEvent')
 	return self
 end
 

@@ -1,7 +1,5 @@
---!strict
-
-const Conch = require("@pkg/conch")
-const ConchUi = require("@pkg/conch-ui")
+const Conch = require('@pkg/conch')
+const ConchUi = require('@pkg/conch-ui')
 
 const ConchProvider = {}
 

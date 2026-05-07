@@ -1,5 +1,5 @@
-const charm = require("@pkg/charm")
-const vide = require("@pkg/vide")
+const charm = require('@pkg/charm')
+const vide = require('@pkg/vide')
 
 const source = vide.source
 const subscribe = charm.subscribe

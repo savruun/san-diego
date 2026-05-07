@@ -1,8 +1,8 @@
-const components = require("@pkg/quill_rblx_components")
-const dependency = require("@pkg/quill_dependencies")
-const quill = require("@pkg/quill_core")
-const lifecycles = require("@pkg/quill_rblx_lifecycles")
-local paths = require("@shared/paths")
+const components = require('@pkg/quill_rblx_components')
+const dependency = require('@pkg/quill_dependencies')
+const quill = require('@pkg/quill_core')
+const lifecycles = require('@pkg/quill_rblx_lifecycles')
+local paths = require('@shared/paths')
 
 const function getModules(): { ModuleScript }
 	const providerInstances = paths.client.providers:GetDescendants()
@@ -12,7 +12,7 @@ const function getModules(): { ModuleScript }
 
 	-- Iterate thru all providers and components to load
 	for _, v in { table.unpack(providerInstances), table.unpack(componentInstances) } do
-		if not v:IsA("ModuleScript") then continue end
+		if not v:IsA('ModuleScript') then continue end
 		table.insert(modules, v :: ModuleScript)
 	end
 

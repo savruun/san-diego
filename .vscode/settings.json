@@ -15,6 +15,6 @@
         "out/**"
     ],
     "luau-lsp.format.convertQuotes": true,
-    "luau-lsp.plugin.enabled": true,
-    "stylua.targetReleaseVersion": "latest",
+    "luau-lsp.studioPlugin.enabled": true,
+    "stylua.targetReleaseVersion": "latest"
 }

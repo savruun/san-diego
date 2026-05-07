@@ -1,4 +1,4 @@
-const CameraShaker = require("@lib/CameraShaker")
+const CameraShaker = require('@lib/CameraShaker')
 const Camera = workspace.CurrentCamera
 
 const CameraProvider = {
