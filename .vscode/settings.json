@@ -14,7 +14,5 @@
         "**/_Index/**",
         "out/**"
     ],
-    "luau-lsp.format.convertQuotes": true,
-    "luau-lsp.studioPlugin.enabled": true,
     "stylua.targetReleaseVersion": "latest"
 }
