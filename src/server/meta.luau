@@ -2,7 +2,7 @@ const charm = require('@pkg/charm')
 const playerTypes = require('@types/player')
 
 type MetaData = {
-  players: { [number]: charm.Atom<playerTypes.PlayerData> },
+  players: { [number]: { data: charm.Atom<playerTypes.PlayerData> } },
   server: {}
 }
 
