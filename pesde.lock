@@ -143,27 +143,6 @@ frktest = [{ name = "itsfrank/frktest", version = "^0.0.4", index = "https://git
 greentea = [{ name = "jiwonz/greentea_luau", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
 luau_path = [{ name = "jiwonz/luau_path", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
 
-[graph."lukadev_0/future@1.0.2 roblox"]
-direct = ["future", { name = "lukadev_0/future", version = "^1.0.2", index = "default" }, "standard"]
-
-[graph."lukadev_0/future@1.0.2 roblox".dependencies]
-option = ["lukadev_0/option@1.2.1 roblox", "standard"]
-std = ["lukadev_0/std@1.0.2 roblox", "standard"]
-threadpool = ["lukadev_0/threadpool@1.0.2 roblox", "standard"]
-
-[graph."lukadev_0/future@1.0.2 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/pesde-pkg/index"
-
-[graph."lukadev_0/future@1.0.2 roblox".pkg_ref.dependencies]
-option = [{ name = "lukadev_0/option", version = "^1.2.1", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-std = [{ name = "lukadev_0/std", version = "^1.0.2", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-threadpool = [{ name = "lukadev_0/threadpool", version = "^1.0.2", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-
-[graph."lukadev_0/option@1.2.1 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
 [graph."lukadev_0/option@1.2.1 lune".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
@@ -171,20 +150,6 @@ index_url = "https://github.com/pesde-pkg/index"
 [graph."lukadev_0/result@1.2.1 lune".pkg_ref]
 ref_ty = "pesde"
 index_url = "https://github.com/pesde-pkg/index"
-
-[graph."lukadev_0/std@1.0.2 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."lukadev_0/threadpool@1.0.2 roblox".dependencies]
-std = ["lukadev_0/std@1.0.2 roblox", "standard"]
-
-[graph."lukadev_0/threadpool@1.0.2 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."lukadev_0/threadpool@1.0.2 roblox".pkg_ref.dependencies]
-std = [{ name = "lukadev_0/std", version = "^1.0.2", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
 
 [graph."pepeeltoro41/ui_labs@2.4.2 roblox"]
 direct = ["ui_labs", { name = "pepeeltoro41/ui_labs", version = "^2.4.2", index = "default" }, "standard"]
@@ -254,6 +219,13 @@ option = [{ name = "lukadev_0/option", version = "^1.2.1", index = "https://gith
 pathfs = [{ name = "jiwonz/pathfs", version = "^0.6.0", index = "https://github.com/pesde-pkg/index" }, "standard"]
 result = [{ name = "lukadev_0/result", version = "^1.2.1", index = "https://github.com/pesde-pkg/index" }, "peer"]
 unzip = [{ name = "0x5eal/unzip", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
+
+[graph."wally#1foreverhd/topbarplus@3.4.0 roblox"]
+direct = ["topbarplus", { wally = "wally#1foreverhd/topbarplus", version = "^3.4.0", index = "default" }, "standard"]
+
+[graph."wally#1foreverhd/topbarplus@3.4.0 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
 
 [graph."wally#alicesaidhi/conch@0.4.0-rc.9 roblox".dependencies]
 language = ["wally#alicesaidhi/conch-language@0.4.0-rc.9 roblox", "standard"]
@@ -347,6 +319,23 @@ index_url = "https://github.com/UpliftGames/wally-index"
 direct = ["profilestore", { wally = "wally#lm-loleris/profilestore", version = "^1.0.3", index = "default" }, "standard"]
 
 [graph."wally#lm-loleris/profilestore@1.0.3 roblox_server".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#red-blox/future@1.0.1 roblox"]
+direct = ["future", { wally = "wally#red-blox/future", version = "^1.0.1", index = "default" }, "standard"]
+
+[graph."wally#red-blox/future@1.0.1 roblox".dependencies]
+Spawn = ["wally#red-blox/spawn@1.1.0 roblox", "standard"]
+
+[graph."wally#red-blox/future@1.0.1 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#red-blox/future@1.0.1 roblox".pkg_ref.dependencies]
+Spawn = [{ wally = "wally#red-blox/spawn", version = ">=1.0.0, <2.0.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+
+[graph."wally#red-blox/spawn@1.1.0 roblox".pkg_ref]
 ref_ty = "wally"
 index_url = "https://github.com/UpliftGames/wally-index"
 
