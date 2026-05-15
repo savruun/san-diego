@@ -14,7 +14,7 @@ const CharacterProvider = {
 function CharacterProvider.start(self: self): ()
   self.character = Player.Character
   self.humanoid = self.character and self.character:FindFirstChildOfClass('Humanoid')
-
+  print('started')
   Player.CharacterAdded:Connect(function(char): ()
     self.character = char
     self.humanoid = char:WaitForChild('Humanoid') :: Humanoid
