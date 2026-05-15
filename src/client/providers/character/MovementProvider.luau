@@ -8,10 +8,10 @@ const dependency = require('@pkg/quill_dependencies')
 const constants = require('@shared/constants')
 const timer = require('@shared/lib/Timer')
 
-const MAX_STAMINA = constants.maxStamina
-const STAMINA_DRAIN_RATE = constants.stamina.drainRate
-const STAMINA_REGEN_RATE = constants.stamina.regenRate
-const SPRINT_COOLDOWN = constants.sprintCooldown
+const MAX_STAMINA = constants.MAX_STAMINA
+const STAMINA_DRAIN_RATE = constants.STAMINA.DRAIN_RATE
+const STAMINA_REGEN_RATE = constants.STAMINA.REGEN_RATE
+const SPRINT_COOLDOWN = constants.SPRINT_COOLDOWN
 
 const MovementProvider = {
   isSprinting = false, stamina = Charm.atom(MAX_STAMINA),
@@ -25,6 +25,7 @@ MovementProvider.CharacterProvider = dependency.use(require('./CharacterProvider
 function MovementProvider.start (self: self): ()
   self:_attachToCharacter()
   self:_attachInput()
+  print('started')
 end
 
 --[[
@@ -67,8 +68,8 @@ function MovementProvider.setSprint (self: self, isSprinting: boolean): ()
   if not self.humanoid then return end
   self.isSprinting = isSprinting
 
-  local walkspeed = isSprinting and constants.walkspeed.sprinting or constants.walkspeed.default
-  local fov = isSprinting and constants.fov.sprinting or constants.fov.default
+  local walkspeed = isSprinting and constants.WALKSPEED.SPRINTING or constants.WALKSPEED.DEFAULT
+  local fov = isSprinting and constants.FOV.SPRINTING or constants.FOV.DEFAULT
 
   local tween = TweenService:Create(workspace.CurrentCamera, TweenInfo.new(0.1), {
     FieldOfView = fov
