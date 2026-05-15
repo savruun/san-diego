@@ -1,19 +1,42 @@
 option ServerOutput = "src/server/net"
 option ClientOutput = "src/client/net"
+option FutureLibrary = "ReplicatedStorage.packages.future"
+
+map Map<K, V> = { [K]: V }
+
+struct JailData {
+  jailed: boolean,
+  timeLeft: i32,
+  reason: string,
+  jailedBy: string
+}
 
 struct GunFireData {
   ammo: i32,
   origin: vector,
-  direction: vector,
+  directions: vector[],
   timestamp: f32,
   gunType: string
 }
 
 struct BulletRenderData {
+  origin: Instance,
+  directions: vector[],
   position: vector,
-  origin: vector,
-  direction: vector,
-  velocity: f32
+  gunType: string,
+  mode: string
+}
+
+struct SafePlayerData {
+  cash: i32,
+  hotbar: Map<string, string>,
+  jailData: JailData
+}
+
+struct GunState {
+  ammo: i32,
+  mode: string,
+  instance: Instance
 }
 
 event FireGun {
@@ -23,9 +46,35 @@ event FireGun {
   Data: GunFireData
 }
 
+event ReloadGun {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: GunState
+}
+
+event SyncGunState {
+  Type: Reliable,
+  From: Server,
+  Call: SingleAsync,
+  Data: GunState
+}
+
 event RenderBullet {
   Type: Reliable,
   From: Server,
   Call: SingleAsync,
   Data: BulletRenderData
+}
+
+event SyncPlayerData {
+  Type: Reliable,
+  From: Server,
+  Call: SingleAsync,
+  Data: SafePlayerData
+}
+
+function GetPersistentData {
+  Yield: Future,
+  Return: SafePlayerData
 }
