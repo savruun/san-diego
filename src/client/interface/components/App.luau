@@ -20,7 +20,7 @@ const function App(page: charm.Atom<string?>, mountedComponents: charm.Atom<{ st
 	const pageName = useAtom(page)
 
 	return create 'ScreenGui' {
-		Name = 'VIDE_ROOT',
+		Name = 'videroot',
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
 

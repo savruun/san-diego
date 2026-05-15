@@ -11,7 +11,7 @@ const MovementProvider = require('@csingletons/character/MovementProvider')
 const useAtom = require('@ui/hooks/useAtom')
 const constants = require('@shared/constants')
 
-const MAX_STAMINA = constants.maxStamina
+const MAX_STAMINA = constants.MAX_STAMINA
 
 const function Sidebar(props: { Name: string, Stamina: vide.Source<number> })
 	return create 'Frame' {
