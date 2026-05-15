@@ -1,21 +1,24 @@
 const constants = {}
 
-constants.fov = {
-  default = 70,
-  sprinting = 75
+constants.FOV = {
+  DEFAULT = 70,
+  SPRINTING = 75
 }
 
-constants.walkspeed = {
-  default = 16,
-  sprinting = 20
+constants.WALKSPEED = {
+  DEFAULT = 16,
+  SPRINTING = 20
 }
 
-constants.maxStamina = 100 -- % value
-constants.sprintCooldown = 3 -- seconds
+constants.MAX_STAMINA = 100 -- % value
+constants.SPRINT_COOLDOWN = 3 -- seconds
 
-constants.stamina = {
-  drainRate = 15, -- % per sec
-  regenRate = 10 -- % per sec 
+constants.STAMINA = {
+  DRAIN_RATE = 15, -- % per sec
+  REGEN_RATE = 10 -- % per sec 
 }
+
+constants.GRAVITY_DAMPING = 0.5
+constants.GRAVITY = Vector3.new(0, -workspace.Gravity * constants.GRAVITY_DAMPING, 0)
 
 return constants
