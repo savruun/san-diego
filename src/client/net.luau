@@ -16,6 +16,7 @@ _G._BLINK["BLINK"] = true
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Future = require(ReplicatedStorage.packages.future)
 local SerdesFunctions = {}
 local BASE_EVENT_NAME = "BLINK"
 local Invocations = 0
@@ -160,46 +161,180 @@ local Queue: any = {
 
 local SerdesEvent = "?"
 local SerdesThread: thread?
-Queue.Reliable[1] = table.create(256)
-export type GunFireData = { ammo: number, origin: Vector3, direction: Vector3, timestamp: number, gunType: string }
-export type BulletRenderData = { position: Vector3, origin: Vector3, direction: Vector3, velocity: number }
-function SerdesFunctions.WriteEVENT_FireGun(Value: { ammo: number, origin: Vector3, direction: Vector3, timestamp: number, gunType: string }): ()
-	-- Allocate BLOCK: 35 bytes
-	local BLOCK_START = Allocate(35)
+Queue.Reliable[2] = table.create(256)
+Queue.Reliable[3] = table.create(256)
+Queue.Reliable[4] = table.create(256)
+Queue.Reliable[5] = table.create(256)
+export type Map<K,V> = {[K]: V}
+export type JailData = { jailed: boolean, timeLeft: number, reason: string, jailedBy: string }
+export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
+export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
+export type SafePlayerData = { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }
+export type GunState = { ammo: number, mode: string, instance: Instance }
+function SerdesFunctions.WriteEVENT_FireGun(Value: { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }): ()
+	-- Allocate BLOCK: 25 bytes
+	local BLOCK_START = Allocate(25)
 	buffer.writeu8(SendBuffer, BLOCK_START + 0, 0)
 	buffer.writei32(SendBuffer, BLOCK_START + 1, Value.ammo)
 	local Vector = Value.origin
 	buffer.writef32(SendBuffer, BLOCK_START + 5, Vector.X)
 	buffer.writef32(SendBuffer, BLOCK_START + 9, Vector.Y)
 	buffer.writef32(SendBuffer, BLOCK_START + 13, Vector.Z)
-	local Vector = Value.direction
-	buffer.writef32(SendBuffer, BLOCK_START + 17, Vector.X)
-	buffer.writef32(SendBuffer, BLOCK_START + 21, Vector.Y)
-	buffer.writef32(SendBuffer, BLOCK_START + 25, Vector.Z)
-	buffer.writef32(SendBuffer, BLOCK_START + 29, Value.timestamp)
+	-- START ARRAY
+	buffer.writeu16(SendBuffer, BLOCK_START + 17, #Value.directions)
+		-- Allocate BLOCK: 12 bytes
+	local ARRAY_START_1 = Allocate(12 * #Value.directions)
+	for Index = 1, #Value.directions do
+		local Item_1 = Value.directions[Index]
+		local Vector = Item_1
+		-- Allocate 4
+		local OPERATION_OFFSET_0 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		buffer.writef32(SendBuffer, OPERATION_OFFSET_0, Vector.X)
+		-- Allocate 4
+		local OPERATION_OFFSET_1 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		buffer.writef32(SendBuffer, OPERATION_OFFSET_1, Vector.Y)
+		-- Allocate 4
+		local OPERATION_OFFSET_2 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		buffer.writef32(SendBuffer, OPERATION_OFFSET_2, Vector.Z)
+	end
+	-- END ARRAY
+	buffer.writef32(SendBuffer, BLOCK_START + 19, Value.timestamp)
 	local Length = #Value.gunType
-	buffer.writeu16(SendBuffer, BLOCK_START + 33, Length)
+	buffer.writeu16(SendBuffer, BLOCK_START + 23, Length)
 	Allocate(Length)
 	buffer.writestring(SendBuffer, SendOffset, Value.gunType, Length)
 end
 
-function SerdesFunctions.ReadEVENT_RenderBullet(): ({ position: Vector3, origin: Vector3, direction: Vector3, velocity: number })
-	-- Read BLOCK: 40 bytes
-	local BLOCK_START = Read(40)
+function SerdesFunctions.WriteEVENT_ReloadGun(Value: { ammo: number, mode: string, instance: Instance }): ()
+	-- Allocate BLOCK: 7 bytes
+	local BLOCK_START = Allocate(7)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 1)
+	buffer.writei32(SendBuffer, BLOCK_START + 1, Value.ammo)
+	local Length = #Value.mode
+	buffer.writeu16(SendBuffer, BLOCK_START + 5, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value.mode, Length)
+	table.insert(SendInstances, Value.instance or Null)
+end
+
+function SerdesFunctions.ReadEVENT_SyncGunState(): ({ ammo: number, mode: string, instance: Instance })
+	-- Read BLOCK: 6 bytes
+	local BLOCK_START = Read(6)
 	local Value = {} :: any
-	local X = buffer.readf32(RecieveBuffer, BLOCK_START + 0)
-	local Y = buffer.readf32(RecieveBuffer, BLOCK_START + 4)
-	local Z = buffer.readf32(RecieveBuffer, BLOCK_START + 8)
+	Value.ammo = buffer.readi32(RecieveBuffer, BLOCK_START + 0)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 4)
+	Value.mode = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	RecieveInstanceCursor += 1
+	Value.instance = RecieveInstances[RecieveInstanceCursor]
+	if typeof(Value.instance) ~= "Instance" then error(`Expected an Instance, got {typeof(Value.instance)} instead.`) end
+	return Value
+end
+
+function SerdesFunctions.ReadEVENT_RenderBullet(): ({ origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string })
+	-- Read BLOCK: 18 bytes
+	local BLOCK_START = Read(18)
+	local Value = {} :: any
+	RecieveInstanceCursor += 1
+	Value.origin = RecieveInstances[RecieveInstanceCursor]
+	if typeof(Value.origin) ~= "Instance" then error(`Expected an Instance, got {typeof(Value.origin)} instead.`) end
+	-- START ARRAY
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
+	if Length < 0 then error(`Expected "Length" to be larger than 0, got {Length} instead.`) end
+	if Length > 65535 then error(`Expected "Length" to be smaller than 65535, got {Length} instead.`) end
+	Value.directions = table.create(Length)
+		-- Read BLOCK: 12 bytes
+	local ARRAY_START_1 = Read(12 * Length)
+	for Index = 1, Length do
+		-- Read 4
+		local OPERATION_OFFSET_0 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		local X = buffer.readf32(RecieveBuffer, OPERATION_OFFSET_0)
+		-- Read 4
+		local OPERATION_OFFSET_1 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		local Y = buffer.readf32(RecieveBuffer, OPERATION_OFFSET_1)
+		-- Read 4
+		local OPERATION_OFFSET_2 = ARRAY_START_1
+		ARRAY_START_1 += 4
+		local Z = buffer.readf32(RecieveBuffer, OPERATION_OFFSET_2)
+		local Item_1 = Vector3.new(X, Y, Z)
+		table.insert(Value.directions, Item_1)
+	end
+	-- END ARRAY
+	local X = buffer.readf32(RecieveBuffer, BLOCK_START + 2)
+	local Y = buffer.readf32(RecieveBuffer, BLOCK_START + 6)
+	local Z = buffer.readf32(RecieveBuffer, BLOCK_START + 10)
 	Value.position = Vector3.new(X, Y, Z)
-	X = buffer.readf32(RecieveBuffer, BLOCK_START + 12)
-	Y = buffer.readf32(RecieveBuffer, BLOCK_START + 16)
-	Z = buffer.readf32(RecieveBuffer, BLOCK_START + 20)
-	Value.origin = Vector3.new(X, Y, Z)
-	X = buffer.readf32(RecieveBuffer, BLOCK_START + 24)
-	Y = buffer.readf32(RecieveBuffer, BLOCK_START + 28)
-	Z = buffer.readf32(RecieveBuffer, BLOCK_START + 32)
-	Value.direction = Vector3.new(X, Y, Z)
-	Value.velocity = buffer.readf32(RecieveBuffer, BLOCK_START + 36)
+	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 14)
+	Value.gunType = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 16)
+	Value.mode = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	return Value
+end
+
+function SerdesFunctions.ReadEVENT_SyncPlayerData(): ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })
+	-- Read BLOCK: 15 bytes
+	local BLOCK_START = Read(15)
+	local Value = {} :: any
+	Value.cash = buffer.readi32(RecieveBuffer, BLOCK_START + 0)
+	Value.hotbar = {}
+	local Elements_1 = buffer.readu16(RecieveBuffer, BLOCK_START + 4)
+	for _ = 1, Elements_1 do
+		local OFFSET_0 = Read(2)
+		local Length = buffer.readu16(RecieveBuffer, OFFSET_0)
+		local Key_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
+		local OFFSET_1 = Read(2)
+		Length = buffer.readu16(RecieveBuffer, OFFSET_1)
+		local Element_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
+		Value.hotbar[Key_1] = Element_1
+	end
+	Value.jailData = {} :: any
+	Value.jailData.jailed = (buffer.readu8(RecieveBuffer, BLOCK_START + 6) == 1)
+	Value.jailData.timeLeft = buffer.readi32(RecieveBuffer, BLOCK_START + 7)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 11)
+	Value.jailData.reason = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 13)
+	Value.jailData.jailedBy = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	return Value
+end
+
+function SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value: nil, InvocationIdentifier: number): ()
+	-- Allocate BLOCK: 2 bytes
+	local BLOCK_START = Allocate(2)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 5)
+	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
+end
+
+function SerdesFunctions.ReadFUNCTION_RETURN_GetPersistentData(): ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })
+	-- Read BLOCK: 16 bytes
+	local BLOCK_START = Read(16)
+	local Success = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
+	if Success ~= 1 then
+		error("Server encountered an error.")
+	end
+	local Value = {} :: any
+	Value.cash = buffer.readi32(RecieveBuffer, BLOCK_START + 1)
+	Value.hotbar = {}
+	local Elements_1 = buffer.readu16(RecieveBuffer, BLOCK_START + 5)
+	for _ = 1, Elements_1 do
+		local OFFSET_0 = Read(2)
+		local Length = buffer.readu16(RecieveBuffer, OFFSET_0)
+		local Key_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
+		local OFFSET_1 = Read(2)
+		Length = buffer.readu16(RecieveBuffer, OFFSET_1)
+		local Element_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
+		Value.hotbar[Key_1] = Element_1
+	end
+	Value.jailData = {} :: any
+	Value.jailData.jailed = (buffer.readu8(RecieveBuffer, BLOCK_START + 7) == 1)
+	Value.jailData.timeLeft = buffer.readi32(RecieveBuffer, BLOCK_START + 8)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 12)
+	Value.jailData.reason = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 14)
+	Value.jailData.jailedBy = buffer.readstring(RecieveBuffer, Read(Length), Length)
 	return Value
 end
 
@@ -209,8 +344,20 @@ if not RunService:IsRunning() then
 	FireGun = {
 		Fire = NOOP
 	},
+	ReloadGun = {
+		Fire = NOOP
+	},
+	SyncGunState = {
+		On = NOOP
+	},
 	RenderBullet = {
 		On = NOOP
+	},
+	SyncPlayerData = {
+		On = NOOP
+	},
+	GetPersistentData = {
+		Invoke = NOOP
 	},
 	})
 	return Returns :: BLINK_EVENTS_SYMBOL
@@ -254,15 +401,46 @@ Reliable.OnClientEvent:Connect(function(Buffer: buffer, Instances: {Instance})
 		-- Read BLOCK: 1 bytes
 		local BLOCK_START = Read(1)
 		local Index = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
-		if Index == 1 then
-			local Value: { position: Vector3, origin: Vector3, direction: Vector3, velocity: number } = SerdesFunctions.ReadEVENT_RenderBullet()
-			if Events.Reliable[1] ~= nil then
-				task.spawn(Events.Reliable[1], Value)
+		if Index == 2 then
+			local Value: { ammo: number, mode: string, instance: Instance } = SerdesFunctions.ReadEVENT_SyncGunState()
+			if Events.Reliable[2] ~= nil then
+				task.spawn(Events.Reliable[2], Value)
 			else
-				if #Queue.Reliable[1] > 256 then
+				if #Queue.Reliable[2] > 256 then
+					warn("[Blink]: Event queue of \"SyncGunState\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[2], {Value} :: {any})
+			end
+		elseif Index == 3 then
+			local Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string } = SerdesFunctions.ReadEVENT_RenderBullet()
+			if Events.Reliable[3] ~= nil then
+				task.spawn(Events.Reliable[3], Value)
+			else
+				if #Queue.Reliable[3] > 256 then
 					warn("[Blink]: Event queue of \"RenderBullet\" exceeded 256, did you forget to implement a listener?")
 				end
-				table.insert(Queue.Reliable[1], {Value} :: {any})
+				table.insert(Queue.Reliable[3], {Value} :: {any})
+			end
+		elseif Index == 4 then
+			local Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = SerdesFunctions.ReadEVENT_SyncPlayerData()
+			if Events.Reliable[4] ~= nil then
+				task.spawn(Events.Reliable[4], Value)
+			else
+				if #Queue.Reliable[4] > 256 then
+					warn("[Blink]: Event queue of \"SyncPlayerData\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[4], {Value} :: {any})
+			end
+		elseif Index == 5 then
+			-- Read BLOCK: 1 bytes
+			local BLOCK_START = Read(1)
+			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
+				local Success, ReturnValue = pcall(function ()
+					return SerdesFunctions.ReadFUNCTION_RETURN_GetPersistentData()
+				end)
+			if Calls[InvocationIdentifier] ~= nil then
+				task.spawn(Calls[InvocationIdentifier], Success, ReturnValue)
+				Calls[InvocationIdentifier] = nil
 			end
 		end
 	end
@@ -290,22 +468,73 @@ local Returns = table.freeze({
 	StepReplication = StepReplication,
 
 	FireGun = {
-		Fire = function(Value: { ammo: number, origin: Vector3, direction: Vector3, timestamp: number, gunType: string }): ()
+		Fire = function(Value: { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }): ()
 			SerdesFunctions.WriteEVENT_FireGun(Value)
 		end
 	},
-	RenderBullet = {
-		On = function(Listener: (Value: { position: Vector3, origin: Vector3, direction: Vector3, velocity: number }) -> ()): () -> ()
-			Events.Reliable[1] = Listener
-			for Index, Arguments in Queue.Reliable[1] do
+	ReloadGun = {
+		Fire = function(Value: { ammo: number, mode: string, instance: Instance }): ()
+			SerdesFunctions.WriteEVENT_ReloadGun(Value)
+		end
+	},
+	SyncGunState = {
+		On = function(Listener: (Value: { ammo: number, mode: string, instance: Instance }) -> ()): () -> ()
+			Events.Reliable[2] = Listener
+			for Index, Arguments in Queue.Reliable[2] do
 				task.spawn(Listener, table.unpack(Arguments))
 			end
-			Queue.Reliable[1] = {}
+			Queue.Reliable[2] = {}
 			return function (): ()
-				if Events.Reliable[1] == Listener then
-					Events.Reliable[1] = nil
+				if Events.Reliable[2] == Listener then
+					Events.Reliable[2] = nil
 				end
 			end
+		end
+	},
+	RenderBullet = {
+		On = function(Listener: (Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }) -> ()): () -> ()
+			Events.Reliable[3] = Listener
+			for Index, Arguments in Queue.Reliable[3] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[3] = {}
+			return function (): ()
+				if Events.Reliable[3] == Listener then
+					Events.Reliable[3] = nil
+				end
+			end
+		end
+	},
+	SyncPlayerData = {
+		On = function(Listener: (Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }) -> ()): () -> ()
+			Events.Reliable[4] = Listener
+			for Index, Arguments in Queue.Reliable[4] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[4] = {}
+			return function (): ()
+				if Events.Reliable[4] == Listener then
+					Events.Reliable[4] = nil
+				end
+			end
+		end
+	},
+	GetPersistentData = {
+		Invoke = function(Value: nil): Future.Future<boolean, { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }>
+			return Future.Try(function ()
+				local InvocationIdentifier = Invoke()
+				if Calls[InvocationIdentifier] ~= nil then
+					Invocations -= 1
+					error("More than 256 calls are awaiting a response, this packet has been dropped.")
+				end
+				SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value, InvocationIdentifier)
+				Calls[InvocationIdentifier] = coroutine.running()
+				local Success, ReturnValue: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = coroutine.yield()
+				if Success ~= true then
+					error("There was an exception while processing \"GetPersistentData\".")
+				end
+				return ReturnValue
+			end)
 		end
 	},
 })
