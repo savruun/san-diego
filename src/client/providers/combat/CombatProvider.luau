@@ -7,13 +7,15 @@ const RunService = game:GetService('RunService')
 
 const constants = require('@shared/constants')
 const net = require('@client/net')
-const gunData = require("../../../shared/data/gunData")
+const gunData = require('@shared/data/gunData')
+const Signal = require('@lib/Signal')
 
 const LocalPlayer = Players.LocalPlayer
 
 const VFX = ReplicatedStorage:WaitForChild('assets'):WaitForChild('vfx')
 const BulletTemplate = VFX:WaitForChild('Bullet') :: BasePart
 const ImpactTemplate = VFX:WaitForChild('BulletImpact') :: Attachment
+const HitTemplate = VFX:WaitForChild('gore'):WaitForChild('BulletHit') :: Attachment
 const MuzzleFlashTemplate = VFX:WaitForChild('MuzzleFlash') :: Attachment
 
 const GRAVITY = constants.GRAVITY
@@ -24,19 +26,21 @@ BulletContainer.Parent = workspace
 
 type FireData = {
 	origin: Attachment,
-  position: Vector3,
+	position: Vector3,
 	direction: Vector3,
 	range: number,
-	velocity: number
+	velocity: number,
 }
 
-const CombatProvider = {}
+const CombatProvider = {
+	HitEnemy = Signal.new(),
+}
 
 local raycastParams = RaycastParams.new()
-raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+raycastParams.ExcludeInstances = { BulletContainer }
 
-local function createImpact(position: Vector3, normal: Vector3, velocity: Vector3)
-	local impact = ImpactTemplate:Clone()
+local function createImpact(position: Vector3, normal: Vector3, velocity: Vector3, hitPerson: boolean)
+	local impact = if not hitPerson then ImpactTemplate:Clone() else HitTemplate:Clone()
 
 	local forward = -velocity.Unit
 	local offsetPosition = position + normal * 0.05
@@ -45,9 +49,7 @@ local function createImpact(position: Vector3, normal: Vector3, velocity: Vector
 	impact.Parent = BulletContainer
 
 	for _, descendant in impact:GetDescendants() do
-		if descendant:IsA('ParticleEmitter') then
-			descendant:Emit(3)
-		end
+		if descendant:IsA('ParticleEmitter') then descendant:Emit(3) end
 	end
 
 	Debris:AddItem(impact, 0.5)
@@ -63,33 +65,33 @@ end
 
 function CombatProvider.start(self: self)
 	raycastParams.FilterDescendantsInstances = {
-		LocalPlayer.Character :: Instance
+		LocalPlayer.Character :: Instance,
 	}
 
-  net.RenderBullet.On(function(data)
-    const directions = data.directions
-    if not directions then return end
+	net.RenderBullet.On(function(data)
+		const directions = data.directions
+		if not directions then return end
 
-    local gunStats = gunData.getDataFromName(data.gunType)
-    if not gunStats then return end -- Should never be true
+		local gunStats = gunData.getDataFromName(data.gunType)
+		if not gunStats then return end -- Should never be true
 
-    local mode = gunData.normalizeMode(gunStats.modes[data.mode :: gunData.GunFireMode])
-    
-    for index, direction in directions do
-      self:renderBullet({
-        direction = direction,
-        origin = data.origin :: Attachment,
-        position = data.position,
-        range = gunStats.range,
-        velocity = gunStats.bulletVelocity
-      })
+		local mode = gunData.normalizeMode(gunStats.modes[data.mode :: gunData.GunFireMode])
 
-      -- Don't wait on the last bullet
-      if index < #directions then
-        task.wait(mode.interval)
-      end
-    end
-  end)
+		for index, direction in directions do
+			self:renderBullet({
+				direction = direction,
+				origin = data.origin :: Attachment,
+				position = data.position,
+				range = gunStats.range,
+				velocity = gunStats.bulletVelocity,
+			})
+
+			-- Don't wait on the last bullet
+			if index < #directions then task.wait(mode.interval) end
+		end
+	end)
+
+	net.KilledPlayer.On(function(killed) print(killed) end)
 end
 
 function CombatProvider.renderBullet(self: self, fireData: FireData): ()
@@ -104,6 +106,8 @@ function CombatProvider.renderBullet(self: self, fireData: FireData): ()
 	local velocity = fireData.direction.Unit * fireData.velocity
 	local traveledDistance = 0
 
+	raycastParams.ExcludeInstances = { BulletContainer, LocalPlayer.Character :: Instance }
+
 	local connection: RBXScriptConnection
 	connection = RunService.Heartbeat:Connect(function(delta)
 		local nextPosition = position + velocity * delta
@@ -115,22 +119,22 @@ function CombatProvider.renderBullet(self: self, fireData: FireData): ()
 			velocity += GRAVITY * delta
 		end
 
-    raycastParams.FilterDescendantsInstances = { LocalPlayer.Character :: Instance, BulletContainer }
-
-		local result = workspace:Raycast(
-			position,
-			displacement,
-			raycastParams
-		)
+		local result = workspace:Raycast(position, displacement, raycastParams)
 
 		if result then
 			bullet.Position = result.Position
 
-			createImpact(
-				result.Position,
-				result.Normal,
-				velocity
-			)
+			local hitPerson = false
+
+			if result.Instance then
+				local char = result.Instance:FindFirstAncestorOfClass('Model')
+				local humanoid = char and char:FindFirstChild('Humanoid')
+
+				hitPerson = humanoid ~= nil
+				if hitPerson then self.HitEnemy:Fire() end
+			end
+
+			createImpact(result.Position, result.Normal, velocity, hitPerson)
 
 			connection:Disconnect()
 			bullet:Destroy()

@@ -10,11 +10,14 @@ type Props = {
   size: UDim2,
   position: UDim2,
   anchorPoint: Vector2,
+  name: string?,
+
   [number]: GuiObject
 }
 
 local function Card(props: Props)
   return create 'Frame' {
+    Name = props.name,
     BackgroundColor3 = props.color or Color3.new(),
     BackgroundTransparency = props.transparency or 0.5,
     Size = props.size,

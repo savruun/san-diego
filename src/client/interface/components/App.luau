@@ -20,22 +20,18 @@ const function App(page: charm.Atom<string?>, mountedComponents: charm.Atom<{ st
 	const pageName = useAtom(page)
 
 	return create 'ScreenGui' {
-		Name = 'videroot',
+		Name = 'VIDE_ROOT',
 		ResetOnSpawn = false,
 		IgnoreGuiInset = true,
 
 		map(pages, function(_, currentName: string)
-			return show(function()
-				return currentName == pageName()
-			end, pages[currentName])
+			return show(function() return currentName == pageName() end, pages[currentName])
 		end),
 
 		create 'Folder' {
 			Name = 'components',
-			values(mountedList, function(name: string)
-				return components[name]()
-			end)
-		}
+			values(mountedList, function(name: string) return components[name]() end),
+		},
 	}
 end
 

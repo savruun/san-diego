@@ -5,106 +5,102 @@ export type GunData = {
 	ammoCapacity: number,
 	reloadTime: number,
 	bulletVelocity: number,
-  defaultMode: GunFireMode,
+	defaultMode: GunFireMode,
 	modes: {
-    [GunFireMode]: GunFireModeData
-  },
+		[GunFireMode]: GunFireModeData,
+	},
 
-  modifiers: GunModifier
+	modifiers: GunModifier,
 }
 
 export type GunFireMode = 'auto' | 'semi' | 'burst'
 
 export type GunFireModeData = {
-  shots: number,
-  interval: number?,
-  spreadType: ('snapshot' | 'perShot')?,
-  repeatWhileHeld: boolean
+	shots: number,
+	interval: number?,
+	spreadType: ('snapshot' | 'perShot')?,
+	repeatWhileHeld: boolean,
 }
 
 export type GunModifier = {
-  headshotMultiplier: number?,
-  recoil: Vector2?,
-  chargeTime: number?,
-  useScope: boolean?
+	headshotMultiplier: number?,
+	recoil: Vector2?,
+	chargeTime: number?,
+	useScope: boolean?,
 }
 
 const gunData = {
-  Default = {
-    damage = 10,
+	Default = {
+		damage = 10,
 		range = 50,
 		fireRate = 0.5,
 		ammoCapacity = 12,
 		reloadTime = 1.5,
 		bulletVelocity = 400,
-    
-    defaultMode = 'semi',
 
-    modes = {
-      semi = {
-        shots = 1
-      },
+		defaultMode = 'semi',
 
-      auto = {
-        shots = 1,
-        repeatWhileHeld = true
-      },
+		modes = {
+			semi = {
+				shots = 1,
+			},
 
-      burst = {
-        shots = 4,
-        interval = .01
-      }
-    }
-  },
+			auto = {
+				shots = 1,
+				repeatWhileHeld = true,
+			},
+
+			burst = {
+				shots = 4,
+				interval = 0.01,
+			},
+		},
+	},
 
 	Pistol = {
 		damage = 10,
 		range = 50,
-		fireRate = 1,
+		fireRate = 0.2,
 		ammoCapacity = 12,
 		reloadTime = 1.5,
 		bulletVelocity = 400,
 
-    defaultMode = 'semi',
+		defaultMode = 'semi',
 
 		modes = {
-      semi = {
-        shots = 1
-      },
+			semi = {
+				shots = 1,
+			},
 
-      burst = {
-        shots = 4,
-        interval = .03
-      },
+			burst = {
+				shots = 4,
+				interval = 0.03,
+			},
 
-      auto = {
-        shots = 1,
-        repeatWhileHeld = true
-      }
-    },
+			auto = {
+				shots = 1,
+				repeatWhileHeld = true,
+			},
+		},
 	},
 }
 
-local function getDataFromName(gunType: keyof<typeof(gunData)> | string): GunData?
-  return gunData[gunType]
-end
+local function getDataFromName(gunType: keyof<typeof(gunData)> | string): GunData? return gunData[gunType] end
 
-local function default(): GunData
-	return gunData.Default
-end
+local function default(): GunData return gunData.Default end
 
 local function normalizeMode(mode: GunFireModeData)
-  return {
-    shots = mode.shots or 1,
-    interval = mode.interval or 0,
-    repeatWhileHeld = mode.repeatWhileHeld or false,
-    spreadType = mode.spreadType or 'perShot'
-  }
+	return {
+		shots = mode.shots or 1,
+		interval = mode.interval or 0,
+		repeatWhileHeld = mode.repeatWhileHeld or false,
+		spreadType = mode.spreadType or 'perShot',
+	}
 end
 
 return {
-  data = gunData,
-  getDataFromName = getDataFromName,
+	data = gunData,
+	getDataFromName = getDataFromName,
 	default = default,
-  normalizeMode = normalizeMode
+	normalizeMode = normalizeMode,
 }
