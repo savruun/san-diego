@@ -161,16 +161,18 @@ local Queue: any = {
 
 local SerdesEvent = "?"
 local SerdesThread: thread?
-Queue.Reliable[2] = table.create(256)
 Queue.Reliable[3] = table.create(256)
 Queue.Reliable[4] = table.create(256)
 Queue.Reliable[5] = table.create(256)
+Queue.Reliable[6] = table.create(256)
+Queue.Reliable[7] = table.create(256)
 export type Map<K,V> = {[K]: V}
 export type JailData = { jailed: boolean, timeLeft: number, reason: string, jailedBy: string }
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
 export type SafePlayerData = { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }
 export type GunState = { ammo: number, mode: string, instance: Instance }
+export type GunModeSwitchData = { gunType: string, mode: string }
 function SerdesFunctions.WriteEVENT_FireGun(Value: { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }): ()
 	-- Allocate BLOCK: 25 bytes
 	local BLOCK_START = Allocate(25)
@@ -218,6 +220,20 @@ function SerdesFunctions.WriteEVENT_ReloadGun(Value: { ammo: number, mode: strin
 	Allocate(Length)
 	buffer.writestring(SendBuffer, SendOffset, Value.mode, Length)
 	table.insert(SendInstances, Value.instance or Null)
+end
+
+function SerdesFunctions.WriteEVENT_SwitchGunMode(Value: { gunType: string, mode: string }): ()
+	-- Allocate BLOCK: 5 bytes
+	local BLOCK_START = Allocate(5)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 2)
+	local Length = #Value.gunType
+	buffer.writeu16(SendBuffer, BLOCK_START + 1, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value.gunType, Length)
+	local Length = #Value.mode
+	buffer.writeu16(SendBuffer, BLOCK_START + 3, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value.mode, Length)
 end
 
 function SerdesFunctions.ReadEVENT_SyncGunState(): ({ ammo: number, mode: string, instance: Instance })
@@ -275,6 +291,14 @@ function SerdesFunctions.ReadEVENT_RenderBullet(): ({ origin: Instance, directio
 	return Value
 end
 
+function SerdesFunctions.ReadEVENT_KilledPlayer(): (string)
+	-- Read BLOCK: 2 bytes
+	local BLOCK_START = Read(2)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
+	local Value = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	return Value
+end
+
 function SerdesFunctions.ReadEVENT_SyncPlayerData(): ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })
 	-- Read BLOCK: 15 bytes
 	local BLOCK_START = Read(15)
@@ -304,7 +328,7 @@ end
 function SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value: nil, InvocationIdentifier: number): ()
 	-- Allocate BLOCK: 2 bytes
 	local BLOCK_START = Allocate(2)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 5)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 7)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 end
 
@@ -347,10 +371,16 @@ if not RunService:IsRunning() then
 	ReloadGun = {
 		Fire = NOOP
 	},
+	SwitchGunMode = {
+		Fire = NOOP
+	},
 	SyncGunState = {
 		On = NOOP
 	},
 	RenderBullet = {
+		On = NOOP
+	},
+	KilledPlayer = {
 		On = NOOP
 	},
 	SyncPlayerData = {
@@ -401,37 +431,47 @@ Reliable.OnClientEvent:Connect(function(Buffer: buffer, Instances: {Instance})
 		-- Read BLOCK: 1 bytes
 		local BLOCK_START = Read(1)
 		local Index = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
-		if Index == 2 then
+		if Index == 3 then
 			local Value: { ammo: number, mode: string, instance: Instance } = SerdesFunctions.ReadEVENT_SyncGunState()
-			if Events.Reliable[2] ~= nil then
-				task.spawn(Events.Reliable[2], Value)
-			else
-				if #Queue.Reliable[2] > 256 then
-					warn("[Blink]: Event queue of \"SyncGunState\" exceeded 256, did you forget to implement a listener?")
-				end
-				table.insert(Queue.Reliable[2], {Value} :: {any})
-			end
-		elseif Index == 3 then
-			local Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string } = SerdesFunctions.ReadEVENT_RenderBullet()
 			if Events.Reliable[3] ~= nil then
 				task.spawn(Events.Reliable[3], Value)
 			else
 				if #Queue.Reliable[3] > 256 then
-					warn("[Blink]: Event queue of \"RenderBullet\" exceeded 256, did you forget to implement a listener?")
+					warn("[Blink]: Event queue of \"SyncGunState\" exceeded 256, did you forget to implement a listener?")
 				end
 				table.insert(Queue.Reliable[3], {Value} :: {any})
 			end
 		elseif Index == 4 then
-			local Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = SerdesFunctions.ReadEVENT_SyncPlayerData()
+			local Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string } = SerdesFunctions.ReadEVENT_RenderBullet()
 			if Events.Reliable[4] ~= nil then
 				task.spawn(Events.Reliable[4], Value)
 			else
 				if #Queue.Reliable[4] > 256 then
-					warn("[Blink]: Event queue of \"SyncPlayerData\" exceeded 256, did you forget to implement a listener?")
+					warn("[Blink]: Event queue of \"RenderBullet\" exceeded 256, did you forget to implement a listener?")
 				end
 				table.insert(Queue.Reliable[4], {Value} :: {any})
 			end
 		elseif Index == 5 then
+			local Value: string = SerdesFunctions.ReadEVENT_KilledPlayer()
+			if Events.Reliable[5] ~= nil then
+				task.spawn(Events.Reliable[5], Value)
+			else
+				if #Queue.Reliable[5] > 256 then
+					warn("[Blink]: Event queue of \"KilledPlayer\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[5], {Value} :: {any})
+			end
+		elseif Index == 6 then
+			local Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = SerdesFunctions.ReadEVENT_SyncPlayerData()
+			if Events.Reliable[6] ~= nil then
+				task.spawn(Events.Reliable[6], Value)
+			else
+				if #Queue.Reliable[6] > 256 then
+					warn("[Blink]: Event queue of \"SyncPlayerData\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[6], {Value} :: {any})
+			end
+		elseif Index == 7 then
 			-- Read BLOCK: 1 bytes
 			local BLOCK_START = Read(1)
 			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
@@ -477,22 +517,13 @@ local Returns = table.freeze({
 			SerdesFunctions.WriteEVENT_ReloadGun(Value)
 		end
 	},
-	SyncGunState = {
-		On = function(Listener: (Value: { ammo: number, mode: string, instance: Instance }) -> ()): () -> ()
-			Events.Reliable[2] = Listener
-			for Index, Arguments in Queue.Reliable[2] do
-				task.spawn(Listener, table.unpack(Arguments))
-			end
-			Queue.Reliable[2] = {}
-			return function (): ()
-				if Events.Reliable[2] == Listener then
-					Events.Reliable[2] = nil
-				end
-			end
+	SwitchGunMode = {
+		Fire = function(Value: { gunType: string, mode: string }): ()
+			SerdesFunctions.WriteEVENT_SwitchGunMode(Value)
 		end
 	},
-	RenderBullet = {
-		On = function(Listener: (Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }) -> ()): () -> ()
+	SyncGunState = {
+		On = function(Listener: (Value: { ammo: number, mode: string, instance: Instance }) -> ()): () -> ()
 			Events.Reliable[3] = Listener
 			for Index, Arguments in Queue.Reliable[3] do
 				task.spawn(Listener, table.unpack(Arguments))
@@ -505,8 +536,8 @@ local Returns = table.freeze({
 			end
 		end
 	},
-	SyncPlayerData = {
-		On = function(Listener: (Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }) -> ()): () -> ()
+	RenderBullet = {
+		On = function(Listener: (Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }) -> ()): () -> ()
 			Events.Reliable[4] = Listener
 			for Index, Arguments in Queue.Reliable[4] do
 				task.spawn(Listener, table.unpack(Arguments))
@@ -515,6 +546,34 @@ local Returns = table.freeze({
 			return function (): ()
 				if Events.Reliable[4] == Listener then
 					Events.Reliable[4] = nil
+				end
+			end
+		end
+	},
+	KilledPlayer = {
+		On = function(Listener: (Value: string) -> ()): () -> ()
+			Events.Reliable[5] = Listener
+			for Index, Arguments in Queue.Reliable[5] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[5] = {}
+			return function (): ()
+				if Events.Reliable[5] == Listener then
+					Events.Reliable[5] = nil
+				end
+			end
+		end
+	},
+	SyncPlayerData = {
+		On = function(Listener: (Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }) -> ()): () -> ()
+			Events.Reliable[6] = Listener
+			for Index, Arguments in Queue.Reliable[6] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[6] = {}
+			return function (): ()
+				if Events.Reliable[6] == Listener then
+					Events.Reliable[6] = nil
 				end
 			end
 		end

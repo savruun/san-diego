@@ -164,13 +164,15 @@ local SerdesEvent = "?"
 local SerdesThread: thread?
 Queue.Reliable[0] = table.create(256)
 Queue.Reliable[1] = table.create(256)
-Queue.Reliable[5] = table.create(256)
+Queue.Reliable[2] = table.create(256)
+Queue.Reliable[7] = table.create(256)
 export type Map<K,V> = {[K]: V}
 export type JailData = { jailed: boolean, timeLeft: number, reason: string, jailedBy: string }
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
 export type SafePlayerData = { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }
 export type GunState = { ammo: number, mode: string, instance: Instance }
+export type GunModeSwitchData = { gunType: string, mode: string }
 function SerdesFunctions.ReadEVENT_FireGun(): ({ ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string })
 	-- Read BLOCK: 24 bytes
 	local BLOCK_START = Read(24)
@@ -223,10 +225,21 @@ function SerdesFunctions.ReadEVENT_ReloadGun(): ({ ammo: number, mode: string, i
 	return Value
 end
 
+function SerdesFunctions.ReadEVENT_SwitchGunMode(): ({ gunType: string, mode: string })
+	-- Read BLOCK: 4 bytes
+	local BLOCK_START = Read(4)
+	local Value = {} :: any
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
+	Value.gunType = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 2)
+	Value.mode = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	return Value
+end
+
 function SerdesFunctions.WriteEVENT_SyncGunState(Value: { ammo: number, mode: string, instance: Instance }): ()
 	-- Allocate BLOCK: 7 bytes
 	local BLOCK_START = Allocate(7)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 2)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 3)
 	buffer.writei32(SendBuffer, BLOCK_START + 1, Value.ammo)
 	local Length = #Value.mode
 	buffer.writeu16(SendBuffer, BLOCK_START + 5, Length)
@@ -238,7 +251,7 @@ end
 function SerdesFunctions.WriteEVENT_RenderBullet(Value: { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }): ()
 	-- Allocate BLOCK: 19 bytes
 	local BLOCK_START = Allocate(19)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 3)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 4)
 	table.insert(SendInstances, Value.origin or Null)
 	-- START ARRAY
 	buffer.writeu16(SendBuffer, BLOCK_START + 1, #Value.directions)
@@ -275,10 +288,20 @@ function SerdesFunctions.WriteEVENT_RenderBullet(Value: { origin: Instance, dire
 	buffer.writestring(SendBuffer, SendOffset, Value.mode, Length)
 end
 
+function SerdesFunctions.WriteEVENT_KilledPlayer(Value: string): ()
+	-- Allocate BLOCK: 3 bytes
+	local BLOCK_START = Allocate(3)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 5)
+	local Length = #Value
+	buffer.writeu16(SendBuffer, BLOCK_START + 1, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value, Length)
+end
+
 function SerdesFunctions.WriteEVENT_SyncPlayerData(Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
 	-- Allocate BLOCK: 16 bytes
 	local BLOCK_START = Allocate(16)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 4)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 6)
 	buffer.writei32(SendBuffer, BLOCK_START + 1, Value.cash)
 	local Elements_1 = 0
 	for Key_1, Element_1 in Value.hotbar do
@@ -314,7 +337,7 @@ end
 function SerdesFunctions.WriteFUNCTION_RETURN_GetPersistentData(Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }, InvocationIdentifier: number): ()
 	-- Allocate BLOCK: 18 bytes
 	local BLOCK_START = Allocate(18)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 5)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 7)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 	buffer.writeu8(SendBuffer, BLOCK_START + 2, 1)
 	buffer.writei32(SendBuffer, BLOCK_START + 3, Value.cash)
@@ -354,6 +377,9 @@ if not RunService:IsRunning() then
 	ReloadGun = {
 		On = NOOP
 	},
+	SwitchGunMode = {
+		On = NOOP
+	},
 	SyncGunState = {
 		Fire = NOOP,
 		FireAll = NOOP,
@@ -361,6 +387,12 @@ if not RunService:IsRunning() then
 		FireExcept = NOOP
 	},
 	RenderBullet = {
+		Fire = NOOP,
+		FireAll = NOOP,
+		FireList = NOOP,
+		FireExcept = NOOP
+	},
+	KilledPlayer = {
 		Fire = NOOP,
 		FireAll = NOOP,
 		FireList = NOOP,
@@ -457,18 +489,28 @@ Reliable.OnServerEvent:Connect(function(Player: Player, Buffer: buffer, Instance
 				end
 				table.insert(Queue.Reliable[1], {Player, Value} :: {any})
 			end
-		elseif Index == 5 then
+		elseif Index == 2 then
+			local Value: { gunType: string, mode: string } = SerdesFunctions.ReadEVENT_SwitchGunMode()
+			if Events.Reliable[2] ~= nil then
+				task.spawn(Events.Reliable[2], Player, Value)
+			else
+				if #Queue.Reliable[2] > 256 then
+					warn("[Blink]: Event queue of \"SwitchGunMode\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[2], {Player, Value} :: {any})
+			end
+		elseif Index == 7 then
 			-- Read BLOCK: 1 bytes
 			local BLOCK_START = Read(1)
 			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
 			local Value: nil = SerdesFunctions.ReadFUNCTION_DATA_GetPersistentData()
-			if Events.Reliable[5] ~= nil then
-				task.spawn(Events.Reliable[5], Player, Value, InvocationIdentifier)
+			if Events.Reliable[7] ~= nil then
+				task.spawn(Events.Reliable[7], Player, Value, InvocationIdentifier)
 			else
-				if #Queue.Reliable[5] > 256 then
+				if #Queue.Reliable[7] > 256 then
 					warn("[Blink]: Event queue of \"GetPersistentData\" exceeded 256, did you forget to implement a listener?")
 				end
-				table.insert(Queue.Reliable[5], {Player, Value, InvocationIdentifier} :: {any})
+				table.insert(Queue.Reliable[7], {Player, Value, InvocationIdentifier} :: {any})
 			end
 		end
 	end
@@ -519,6 +561,20 @@ local Returns = table.freeze({
 			return function (): ()
 				if Events.Reliable[1] == Listener then
 					Events.Reliable[1] = nil
+				end
+			end
+		end
+	},
+	SwitchGunMode = {
+		On = function(Listener: (Player: Player, Value: { gunType: string, mode: string }) -> ()): () -> ()
+			Events.Reliable[2] = Listener
+			for Index, Arguments in Queue.Reliable[2] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[2] = {}
+			return function (): ()
+				if Events.Reliable[2] == Listener then
+					Events.Reliable[2] = nil
 				end
 			end
 		end
@@ -615,6 +671,52 @@ local Returns = table.freeze({
 			end
 		end,
 	},
+	KilledPlayer = {
+		Fire = function(Player: Player, Value: string): ()
+			Load(PlayersMap[Player])
+			SerdesFunctions.WriteEVENT_KilledPlayer(Value)
+			PlayersMap[Player] = Save()
+		end,
+		FireAll = function(Value: string): ()
+			Load()
+			SerdesFunctions.WriteEVENT_KilledPlayer(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in Players:GetPlayers() do
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
+		FireList = function(List: {Player}, Value: string): ()
+			Load()
+			SerdesFunctions.WriteEVENT_KilledPlayer(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in List do
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
+		FireExcept = function(Except: Player, Value: string): ()
+			Load()
+			SerdesFunctions.WriteEVENT_KilledPlayer(Value)
+			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
+			for _, Player in Players:GetPlayers() do
+				if Player == Except then
+					continue
+				end
+				Load(PlayersMap[Player])
+				local Position = Allocate(Size)
+				buffer.copy(SendBuffer, Position, Buffer, 0, Size)
+				table.move(Instances, 1, #Instances, #SendInstances + 1, SendInstances)
+				PlayersMap[Player] = Save()
+			end
+		end,
+	},
 	SyncPlayerData = {
 		Fire = function(Player: Player, Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
 			Load(PlayersMap[Player])
@@ -663,7 +765,7 @@ local Returns = table.freeze({
 	},
 	GetPersistentData = {
 		On = function(Listener: (Player, nil) -> ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })): ()
-			Events.Reliable[5] = function(Player: Player, Value: nil, InvocationIdentifier: number): ()
+			Events.Reliable[7] = function(Player: Player, Value: nil, InvocationIdentifier: number): ()
 				local ReturnValue: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } };
 				local Success, Error = pcall(function ()
 					ReturnValue = Listener(Player, Value)
@@ -671,7 +773,7 @@ local Returns = table.freeze({
 				Load(PlayersMap[Player])
 				if Success ~= true then
 					local Position = Allocate(3)
-					buffer.writeu8(SendBuffer, Position, 5)
+					buffer.writeu8(SendBuffer, Position, 7)
 					buffer.writeu8(SendBuffer, Position + 1, InvocationIdentifier)
 					buffer.writeu8(SendBuffer, Position + 2, 0)
 					warn(`"GetPersistentData" encountered an error, {Error}`)
@@ -681,10 +783,10 @@ local Returns = table.freeze({
 				PlayersMap[Player] = Save()
 			end
 			task.spawn(function (): ()
-				local EventQueue = Queue.Reliable[5] or {}
-				Queue.Reliable[5] = nil
+				local EventQueue = Queue.Reliable[7] or {}
+				Queue.Reliable[7] = nil
 				for Index, Arguments in EventQueue do
-					Events.Reliable[5](table.unpack(Arguments))
+					Events.Reliable[7](table.unpack(Arguments))
 				end
 			end)
 		end
