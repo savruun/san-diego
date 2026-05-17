@@ -2,31 +2,30 @@
 
 const Players = game:GetService('Players')
 
-const App = require('@ui/components/App')
 const vide = require('@pkg/vide')
 const charm = require('@pkg/charm')
+const icon = require('@pkg/topbarplus')
 
-const paths = require('@shared/paths')
-
-const Player = Players.LocalPlayer
 const atom = charm.atom
 
+const paths = require('@shared/paths')
+const iconIds = require('@shared/data/iconIds')
+
+const App = require('@ui/components/App')
+
+const Player = Players.LocalPlayer
 const playerGui = Player:WaitForChild('PlayerGui')
 
 const InterfaceProvider = {
 	__rootCleanup = function() end,
 	page = atom<<string?>>(),
-	mountedComponents = atom<<{ string }>>({})
+	mountedComponents = atom<<{ string }>>({}),
 }
 
 function InterfaceProvider.start(self: self): ()
-  print(playerGui)
-  print('started interface provider')
+	self.__rootCleanup = vide.mount(function() return App(self.page, self.mountedComponents) end, playerGui)
 
-	self.__rootCleanup = vide.mount(function()
-		return App(self.page, self.mountedComponents)
-	end, playerGui)
-
+	self:__mountTopbar()
 	self:__setDefaultValues()
 end
 
@@ -35,10 +34,8 @@ end
 ]]
 function InterfaceProvider.mountComponent(self: self, componentName: string): ()
 	local componentExists = paths.interface.components:FindFirstChild(componentName) ~= nil
-	if not componentExists then
-		return warn('No component exists with name ', componentName)
-	end
-	
+	if not componentExists then return warn('No component exists with name ', componentName) end
+
 	local currentValue = self.mountedComponents()
 	table.insert(currentValue, componentName)
 
@@ -53,7 +50,7 @@ function InterfaceProvider.unmountComponent(self: self, componentName: string): 
 
 	local index = table.find(currentValue, componentName)
 	if not index then return end
-	
+
 	table.remove(currentValue, index)
 	self.mountedComponents(currentValue)
 end
@@ -63,9 +60,7 @@ end
 ]]
 function InterfaceProvider.setPage(self: self, pageName: string): ()
 	local pageExists = paths.interface.pages:FindFirstChild(pageName) ~= nil
-	if not pageExists then
-		return warn('No page with name ', pageName)
-	end
+	if not pageExists then return warn('No page with name ', pageName) end
 
 	self.page(pageName)
 end
@@ -78,6 +73,11 @@ function InterfaceProvider.cleanup(self: self) self.__rootCleanup() end
 function InterfaceProvider.__setDefaultValues(self: self)
 	self.page('HUD')
 	self.mountedComponents({ 'CharacterSidebarContainer' })
+end
+
+function InterfaceProvider.__mountTopbar(self: self)
+	icon.new():setImage(iconIds.topbar.ranks):setLabel('Ranks')
+	icon.new():setImage(iconIds.topbar.setting):setLabel('Settings')
 end
 
 export type self = typeof(InterfaceProvider)
