@@ -39,6 +39,11 @@ struct GunState {
   instance: Instance
 }
 
+struct GunModeSwitchData {
+  gunType: string,
+  mode: string
+}
+
 event FireGun {
   Type: Reliable,
   From: Client,
@@ -53,6 +58,13 @@ event ReloadGun {
   Data: GunState
 }
 
+event SwitchGunMode {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: GunModeSwitchData
+}
+
 event SyncGunState {
   Type: Reliable,
   From: Server,
@@ -65,6 +77,13 @@ event RenderBullet {
   From: Server,
   Call: SingleAsync,
   Data: BulletRenderData
+}
+
+event KilledPlayer {
+  Type: Reliable,
+  From: Server,
+  Call: SingleAsync,
+  Data: string
 }
 
 event SyncPlayerData {
