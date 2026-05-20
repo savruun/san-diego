@@ -13,6 +13,7 @@ const iconIds = require('@shared/data/iconIds')
 const safeChatOptions = require('@shared/data/safeChatOptions')
 
 const App = require('@ui/components/App')
+const net = require('../net')
 
 const Player = Players.LocalPlayer
 const playerGui = Player:WaitForChild('PlayerGui')
@@ -90,17 +91,17 @@ function InterfaceProvider.__mountTopbar(self: self)
 	self.icons.ranks:setImage(iconIds.topbar.ranks):setLabel('Ranks')
 	self.icons.settings:setImage(iconIds.topbar.setting):setLabel('Settings')
 
-	for _, safeChatOption in safeChatOptions.armed do
+	for index, safeChatOption in safeChatOptions.armed do
 		table.insert(
 			self.icons.dropdowns.safechat,
 			icon.new():setLabel(safeChatOption):oneClick(true):bindEvent('selected', function(...)
 				self.icons.safechat:deselect()
-				print(safeChatOption)
+				net.SaySafeChatOption.Fire(index)
 			end)
 		)
 	end
 
-	self.icons.safechat:setOrder(1):setImage(iconIds.topbar.ranks):setDropdown(self.icons.dropdowns.safechat)
+	self.icons.safechat:setOrder(1):setImage(iconIds.topbar.chat):setDropdown(self.icons.dropdowns.safechat)
 end
 
 export type self = typeof(InterfaceProvider)

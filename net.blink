@@ -81,6 +81,13 @@ event SyncPlayerData {
   Data: unknown
 }
 
+event SaySafeChatOption {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: i32
+}
+
 function GetPersistentData {
   Yield: Future,
   Return: unknown

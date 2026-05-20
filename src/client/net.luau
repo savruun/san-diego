@@ -165,7 +165,7 @@ Queue.Reliable[3] = table.create(256)
 Queue.Reliable[4] = table.create(256)
 Queue.Reliable[5] = table.create(256)
 Queue.Reliable[6] = table.create(256)
-Queue.Reliable[7] = table.create(256)
+Queue.Reliable[8] = table.create(256)
 export type Map<K,V> = {[K]: V}
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
@@ -303,10 +303,17 @@ function SerdesFunctions.ReadEVENT_SyncPlayerData(): (any)
 	return Value
 end
 
+function SerdesFunctions.WriteEVENT_SaySafeChatOption(Value: number): ()
+	-- Allocate BLOCK: 5 bytes
+	local BLOCK_START = Allocate(5)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 7)
+	buffer.writei32(SendBuffer, BLOCK_START + 1, Value)
+end
+
 function SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value: nil, InvocationIdentifier: number): ()
 	-- Allocate BLOCK: 2 bytes
 	local BLOCK_START = Allocate(2)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 7)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 8)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 end
 
@@ -345,6 +352,9 @@ if not RunService:IsRunning() then
 	},
 	SyncPlayerData = {
 		On = NOOP
+	},
+	SaySafeChatOption = {
+		Fire = NOOP
 	},
 	GetPersistentData = {
 		Invoke = NOOP
@@ -431,7 +441,7 @@ Reliable.OnClientEvent:Connect(function(Buffer: buffer, Instances: {Instance})
 				end
 				table.insert(Queue.Reliable[6], {Value} :: {any})
 			end
-		elseif Index == 7 then
+		elseif Index == 8 then
 			-- Read BLOCK: 1 bytes
 			local BLOCK_START = Read(1)
 			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
@@ -536,6 +546,11 @@ local Returns = table.freeze({
 					Events.Reliable[6] = nil
 				end
 			end
+		end
+	},
+	SaySafeChatOption = {
+		Fire = function(Value: number): ()
+			SerdesFunctions.WriteEVENT_SaySafeChatOption(Value)
 		end
 	},
 	GetPersistentData = {
