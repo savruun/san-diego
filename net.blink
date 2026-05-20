@@ -4,12 +4,6 @@ option FutureLibrary = "ReplicatedStorage.packages.future"
 
 map Map<K, V> = { [K]: V }
 
-struct JailData {
-  jailed: boolean,
-  timeLeft: i32,
-  reason: string,
-  jailedBy: string
-}
 
 struct GunFireData {
   ammo: i32,
@@ -25,12 +19,6 @@ struct BulletRenderData {
   position: vector,
   gunType: string,
   mode: string
-}
-
-struct SafePlayerData {
-  cash: i32,
-  hotbar: Map<string, string>,
-  jailData: JailData
 }
 
 struct GunState {
@@ -90,10 +78,10 @@ event SyncPlayerData {
   Type: Reliable,
   From: Server,
   Call: SingleAsync,
-  Data: SafePlayerData
+  Data: unknown
 }
 
 function GetPersistentData {
   Yield: Future,
-  Return: SafePlayerData
+  Return: unknown
 }
