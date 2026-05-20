@@ -2,8 +2,9 @@ local function image(id) return `rbxassetid://{id}` end
 
 const iconIds = {
 	topbar = {
-		ranks = image(123204329602159),
-		setting = image(113397412612580),
+		ranks = image(90479647221131),
+		setting = image(134899927732100),
+		chat = image(121373820642208),
 	},
 
 	hud = {
