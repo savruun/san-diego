@@ -55,6 +55,13 @@ const gunData = {
 				interval = 0.01,
 			},
 		},
+
+		modifiers = {
+			useScope = false,
+			headshotMultiplier = 1,
+			recoil = Vector2.zero,
+			chargeTime = 0,
+		},
 	},
 
 	Pistol = {
@@ -98,9 +105,33 @@ local function normalizeMode(mode: GunFireModeData)
 	}
 end
 
+local function normalizeGunData(data: GunData)
+	const defaultData = default()
+
+	local gunData = {
+		damage = data.damage or defaultData.damage,
+		range = data.range or defaultData.range,
+		fireRate = data.fireRate or defaultData.fireRate,
+		ammoCapacity = data.ammoCapacity or defaultData.ammoCapacity,
+		reloadTime = data.reloadTime or defaultData.reloadTime,
+		bulletVelocity = data.bulletVelocity or defaultData.bulletVelocity,
+		defaultMode = data.defaultMode or defaultData.defaultMode,
+		modes = data.modes or defaultData.modes,
+		modifiers = data.modifiers or defaultData.modifiers,
+	}
+
+	-- Normalize all modes in the data
+	for key, mode in gunData.modes do
+		gunData.modes[key] = normalizeMode(mode)
+	end
+
+	return gunData
+end
+
 return {
 	data = gunData,
 	getDataFromName = getDataFromName,
 	default = default,
 	normalizeMode = normalizeMode,
+	normalizeGunData = normalizeGunData,
 }
