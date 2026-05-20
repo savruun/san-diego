@@ -9,11 +9,20 @@ const SettingsProvider = {
     Fires when a setting changes.
 	]]
 	SettingChanged = Signal.new<<(string, any, any)>>(),
+
+	--[[
+    Fires when the settings are initially loaded.
+  ]]
+	SettingsLoaded = Signal.new<<playerTypes.SafePlayerData>>(),
 }
 
-function SettingsProvider.start(self: self)
-	charm.subscribe(atoms.playerData, function(state, lastState)
-		lastState = lastState or {} -- Incase there is no last state
+function SettingsProvider.start(self: self): ()
+	charm.subscribe<<playerTypes.SafePlayerData>>(atoms.playerData, function(state, lastState)
+		-- On the initial sync, fire SettingsLoaded instead
+		if not lastState then
+			self.SettingsLoaded:Fire(state)
+			return
+		end
 
 		for name: string, value in state do
 			const lastValue = lastState[name]
@@ -33,7 +42,7 @@ function SettingsProvider.getSettings(self: self): playerTypes.SafePlayerData re
   Get a setting's value by its name.
   @param settingName The name of the setting to get.
 ]]
-function SettingsProvider.getSetting(self: self, settingName: keyof<playerTypes.SafePlayerData>)
+function SettingsProvider.getSetting<T>(self: self, settingName: keyof<playerTypes.SafePlayerData>): T
 	const settings = atoms.playerData()
 	return settings[settingName]
 end
