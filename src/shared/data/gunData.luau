@@ -89,6 +89,10 @@ const gunData = {
 				repeatWhileHeld = true,
 			},
 		},
+
+		modifiers = {
+			headshotMultiplier = 3,
+		},
 	},
 }
 
