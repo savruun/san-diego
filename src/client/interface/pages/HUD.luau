@@ -323,7 +323,7 @@ local function HUD()
 
 		create 'ImageLabel' {
 			Name = 'Hitmarker',
-			Image = iconIds.hitmarker,
+			Image = iconIds.hud.hitmarker,
 			Size = UDim2.fromScale(0.03, 0.03),
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundTransparency = 1,
