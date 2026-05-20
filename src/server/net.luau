@@ -167,10 +167,8 @@ Queue.Reliable[1] = table.create(256)
 Queue.Reliable[2] = table.create(256)
 Queue.Reliable[7] = table.create(256)
 export type Map<K,V> = {[K]: V}
-export type JailData = { jailed: boolean, timeLeft: number, reason: string, jailedBy: string }
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
-export type SafePlayerData = { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }
 export type GunState = { ammo: number, mode: string, instance: Instance }
 export type GunModeSwitchData = { gunType: string, mode: string }
 function SerdesFunctions.ReadEVENT_FireGun(): ({ ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string })
@@ -298,74 +296,24 @@ function SerdesFunctions.WriteEVENT_KilledPlayer(Value: string): ()
 	buffer.writestring(SendBuffer, SendOffset, Value, Length)
 end
 
-function SerdesFunctions.WriteEVENT_SyncPlayerData(Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
-	-- Allocate BLOCK: 16 bytes
-	local BLOCK_START = Allocate(16)
+function SerdesFunctions.WriteEVENT_SyncPlayerData(Value: any): ()
+	-- Allocate BLOCK: 1 bytes
+	local BLOCK_START = Allocate(1)
 	buffer.writeu8(SendBuffer, BLOCK_START + 0, 6)
-	buffer.writei32(SendBuffer, BLOCK_START + 1, Value.cash)
-	local Elements_1 = 0
-	for Key_1, Element_1 in Value.hotbar do
-		Elements_1 += 1
-		local Length = #Key_1
-		local OFFSET_0 = Allocate(2)
-		buffer.writeu16(SendBuffer, OFFSET_0, Length)
-		Allocate(Length)
-		buffer.writestring(SendBuffer, SendOffset, Key_1, Length)
-		local Length = #Element_1
-		local OFFSET_1 = Allocate(2)
-		buffer.writeu16(SendBuffer, OFFSET_1, Length)
-		Allocate(Length)
-		buffer.writestring(SendBuffer, SendOffset, Element_1, Length)
-	end
-	buffer.writeu16(SendBuffer, BLOCK_START + 5, Elements_1)
-	buffer.writeu8(SendBuffer, BLOCK_START + 7, Value.jailData.jailed and 1 or 0)
-	buffer.writei32(SendBuffer, BLOCK_START + 8, Value.jailData.timeLeft)
-	local Length = #Value.jailData.reason
-	buffer.writeu16(SendBuffer, BLOCK_START + 12, Length)
-	Allocate(Length)
-	buffer.writestring(SendBuffer, SendOffset, Value.jailData.reason, Length)
-	local Length = #Value.jailData.jailedBy
-	buffer.writeu16(SendBuffer, BLOCK_START + 14, Length)
-	Allocate(Length)
-	buffer.writestring(SendBuffer, SendOffset, Value.jailData.jailedBy, Length)
+	table.insert(SendInstances, if Value == nil then Null else Value)
 end
 
 function SerdesFunctions.ReadFUNCTION_DATA_GetPersistentData(): (nil)
 	return nil
 end
 
-function SerdesFunctions.WriteFUNCTION_RETURN_GetPersistentData(Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }, InvocationIdentifier: number): ()
-	-- Allocate BLOCK: 18 bytes
-	local BLOCK_START = Allocate(18)
+function SerdesFunctions.WriteFUNCTION_RETURN_GetPersistentData(Value: any, InvocationIdentifier: number): ()
+	-- Allocate BLOCK: 3 bytes
+	local BLOCK_START = Allocate(3)
 	buffer.writeu8(SendBuffer, BLOCK_START + 0, 7)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 	buffer.writeu8(SendBuffer, BLOCK_START + 2, 1)
-	buffer.writei32(SendBuffer, BLOCK_START + 3, Value.cash)
-	local Elements_1 = 0
-	for Key_1, Element_1 in Value.hotbar do
-		Elements_1 += 1
-		local Length = #Key_1
-		local OFFSET_0 = Allocate(2)
-		buffer.writeu16(SendBuffer, OFFSET_0, Length)
-		Allocate(Length)
-		buffer.writestring(SendBuffer, SendOffset, Key_1, Length)
-		local Length = #Element_1
-		local OFFSET_1 = Allocate(2)
-		buffer.writeu16(SendBuffer, OFFSET_1, Length)
-		Allocate(Length)
-		buffer.writestring(SendBuffer, SendOffset, Element_1, Length)
-	end
-	buffer.writeu16(SendBuffer, BLOCK_START + 7, Elements_1)
-	buffer.writeu8(SendBuffer, BLOCK_START + 9, Value.jailData.jailed and 1 or 0)
-	buffer.writei32(SendBuffer, BLOCK_START + 10, Value.jailData.timeLeft)
-	local Length = #Value.jailData.reason
-	buffer.writeu16(SendBuffer, BLOCK_START + 14, Length)
-	Allocate(Length)
-	buffer.writestring(SendBuffer, SendOffset, Value.jailData.reason, Length)
-	local Length = #Value.jailData.jailedBy
-	buffer.writeu16(SendBuffer, BLOCK_START + 16, Length)
-	Allocate(Length)
-	buffer.writestring(SendBuffer, SendOffset, Value.jailData.jailedBy, Length)
+	table.insert(SendInstances, if Value == nil then Null else Value)
 end
 
 if not RunService:IsRunning() then
@@ -718,12 +666,12 @@ local Returns = table.freeze({
 		end,
 	},
 	SyncPlayerData = {
-		Fire = function(Player: Player, Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
+		Fire = function(Player: Player, Value: any): ()
 			Load(PlayersMap[Player])
 			SerdesFunctions.WriteEVENT_SyncPlayerData(Value)
 			PlayersMap[Player] = Save()
 		end,
-		FireAll = function(Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
+		FireAll = function(Value: any): ()
 			Load()
 			SerdesFunctions.WriteEVENT_SyncPlayerData(Value)
 			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
@@ -735,7 +683,7 @@ local Returns = table.freeze({
 				PlayersMap[Player] = Save()
 			end
 		end,
-		FireList = function(List: {Player}, Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
+		FireList = function(List: {Player}, Value: any): ()
 			Load()
 			SerdesFunctions.WriteEVENT_SyncPlayerData(Value)
 			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
@@ -747,7 +695,7 @@ local Returns = table.freeze({
 				PlayersMap[Player] = Save()
 			end
 		end,
-		FireExcept = function(Except: Player, Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }): ()
+		FireExcept = function(Except: Player, Value: any): ()
 			Load()
 			SerdesFunctions.WriteEVENT_SyncPlayerData(Value)
 			local Buffer, Size, Instances = SendBuffer, SendCursor, SendInstances
@@ -764,9 +712,9 @@ local Returns = table.freeze({
 		end,
 	},
 	GetPersistentData = {
-		On = function(Listener: (Player, nil) -> ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })): ()
+		On = function(Listener: (Player, nil) -> (any)): ()
 			Events.Reliable[7] = function(Player: Player, Value: nil, InvocationIdentifier: number): ()
-				local ReturnValue: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } };
+				local ReturnValue: any;
 				local Success, Error = pcall(function ()
 					ReturnValue = Listener(Player, Value)
 				end)

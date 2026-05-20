@@ -167,10 +167,8 @@ Queue.Reliable[5] = table.create(256)
 Queue.Reliable[6] = table.create(256)
 Queue.Reliable[7] = table.create(256)
 export type Map<K,V> = {[K]: V}
-export type JailData = { jailed: boolean, timeLeft: number, reason: string, jailedBy: string }
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
-export type SafePlayerData = { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }
 export type GunState = { ammo: number, mode: string, instance: Instance }
 export type GunModeSwitchData = { gunType: string, mode: string }
 function SerdesFunctions.WriteEVENT_FireGun(Value: { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }): ()
@@ -299,29 +297,9 @@ function SerdesFunctions.ReadEVENT_KilledPlayer(): (string)
 	return Value
 end
 
-function SerdesFunctions.ReadEVENT_SyncPlayerData(): ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })
-	-- Read BLOCK: 15 bytes
-	local BLOCK_START = Read(15)
-	local Value = {} :: any
-	Value.cash = buffer.readi32(RecieveBuffer, BLOCK_START + 0)
-	Value.hotbar = {}
-	local Elements_1 = buffer.readu16(RecieveBuffer, BLOCK_START + 4)
-	for _ = 1, Elements_1 do
-		local OFFSET_0 = Read(2)
-		local Length = buffer.readu16(RecieveBuffer, OFFSET_0)
-		local Key_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
-		local OFFSET_1 = Read(2)
-		Length = buffer.readu16(RecieveBuffer, OFFSET_1)
-		local Element_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
-		Value.hotbar[Key_1] = Element_1
-	end
-	Value.jailData = {} :: any
-	Value.jailData.jailed = (buffer.readu8(RecieveBuffer, BLOCK_START + 6) == 1)
-	Value.jailData.timeLeft = buffer.readi32(RecieveBuffer, BLOCK_START + 7)
-	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 11)
-	Value.jailData.reason = buffer.readstring(RecieveBuffer, Read(Length), Length)
-	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 13)
-	Value.jailData.jailedBy = buffer.readstring(RecieveBuffer, Read(Length), Length)
+function SerdesFunctions.ReadEVENT_SyncPlayerData(): (any)
+	RecieveInstanceCursor += 1
+	local Value = RecieveInstances[RecieveInstanceCursor]
 	return Value
 end
 
@@ -332,33 +310,15 @@ function SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value: nil, Invoca
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 end
 
-function SerdesFunctions.ReadFUNCTION_RETURN_GetPersistentData(): ({ cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } })
-	-- Read BLOCK: 16 bytes
-	local BLOCK_START = Read(16)
+function SerdesFunctions.ReadFUNCTION_RETURN_GetPersistentData(): (any)
+	-- Read BLOCK: 1 bytes
+	local BLOCK_START = Read(1)
 	local Success = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
 	if Success ~= 1 then
 		error("Server encountered an error.")
 	end
-	local Value = {} :: any
-	Value.cash = buffer.readi32(RecieveBuffer, BLOCK_START + 1)
-	Value.hotbar = {}
-	local Elements_1 = buffer.readu16(RecieveBuffer, BLOCK_START + 5)
-	for _ = 1, Elements_1 do
-		local OFFSET_0 = Read(2)
-		local Length = buffer.readu16(RecieveBuffer, OFFSET_0)
-		local Key_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
-		local OFFSET_1 = Read(2)
-		Length = buffer.readu16(RecieveBuffer, OFFSET_1)
-		local Element_1 = buffer.readstring(RecieveBuffer, Read(Length), Length)
-		Value.hotbar[Key_1] = Element_1
-	end
-	Value.jailData = {} :: any
-	Value.jailData.jailed = (buffer.readu8(RecieveBuffer, BLOCK_START + 7) == 1)
-	Value.jailData.timeLeft = buffer.readi32(RecieveBuffer, BLOCK_START + 8)
-	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 12)
-	Value.jailData.reason = buffer.readstring(RecieveBuffer, Read(Length), Length)
-	Length = buffer.readu16(RecieveBuffer, BLOCK_START + 14)
-	Value.jailData.jailedBy = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	RecieveInstanceCursor += 1
+	local Value = RecieveInstances[RecieveInstanceCursor]
 	return Value
 end
 
@@ -462,7 +422,7 @@ Reliable.OnClientEvent:Connect(function(Buffer: buffer, Instances: {Instance})
 				table.insert(Queue.Reliable[5], {Value} :: {any})
 			end
 		elseif Index == 6 then
-			local Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = SerdesFunctions.ReadEVENT_SyncPlayerData()
+			local Value: any = SerdesFunctions.ReadEVENT_SyncPlayerData()
 			if Events.Reliable[6] ~= nil then
 				task.spawn(Events.Reliable[6], Value)
 			else
@@ -565,7 +525,7 @@ local Returns = table.freeze({
 		end
 	},
 	SyncPlayerData = {
-		On = function(Listener: (Value: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }) -> ()): () -> ()
+		On = function(Listener: (Value: any) -> ()): () -> ()
 			Events.Reliable[6] = Listener
 			for Index, Arguments in Queue.Reliable[6] do
 				task.spawn(Listener, table.unpack(Arguments))
@@ -579,7 +539,7 @@ local Returns = table.freeze({
 		end
 	},
 	GetPersistentData = {
-		Invoke = function(Value: nil): Future.Future<boolean, { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } }>
+		Invoke = function(Value: nil): Future.Future<boolean, any>
 			return Future.Try(function ()
 				local InvocationIdentifier = Invoke()
 				if Calls[InvocationIdentifier] ~= nil then
@@ -588,7 +548,7 @@ local Returns = table.freeze({
 				end
 				SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value, InvocationIdentifier)
 				Calls[InvocationIdentifier] = coroutine.running()
-				local Success, ReturnValue: { cash: number, hotbar: {[string]: string}, jailData: { jailed: boolean, timeLeft: number, reason: string, jailedBy: string } } = coroutine.yield()
+				local Success, ReturnValue: any = coroutine.yield()
 				if Success ~= true then
 					error("There was an exception while processing \"GetPersistentData\".")
 				end
