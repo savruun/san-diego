@@ -13,6 +13,8 @@ const SettingsProvider = {
 
 function SettingsProvider.start(self: self)
 	charm.subscribe(atoms.playerData, function(state, lastState)
+		lastState = lastState or {} -- Incase there is no last state
+
 		for name: string, value in state do
 			const lastValue = lastState[name]
 			if value == lastValue then continue end -- If theres no diff then skip it
