@@ -21,7 +21,7 @@ constants.STAMINA = {
 constants.GRAVITY_DAMPING = 0.5
 constants.GRAVITY = Vector3.new(0, -workspace.Gravity * constants.GRAVITY_DAMPING, 0)
 
-constants.HEAD_ACCESSORIES = {
+constants.HEADSHOT_ACCESSORIES = {
 	Enum.AccessoryType.Hair,
 	Enum.AccessoryType.Face,
 	Enum.AccessoryType.Hat,
