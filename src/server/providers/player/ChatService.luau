@@ -16,7 +16,7 @@ ChatService.PlayerDataProvider = dependency.use(require('@ssingletons/player/Pla
 
 function ChatService.start(self: self)
 	self:__listenForSafeChat()
-	self.PlayerDataProvider.DropPlayerData:Connect(function(player) self.cooldowns[player.UserId] = nil end)
+	self.PlayerDataProvider.DropPlayerData:Connect(function(player) safeChatDebounce:clear(player.UserId) end)
 end
 
 function ChatService.__listenForSafeChat(self: self)
