@@ -91,8 +91,8 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 		return
 	end
 
-	const gunStats = gunData.getDataFromName(data.gunType)
-	if not gunStats then return end
+	const config = gunData.getDataFromName(data.gunType)
+	if not config then return end
 
 	-- Get the gun instance from the character or backpack
 	const gun = getters.getToolFromPlayer(player, data.gunType)
@@ -119,12 +119,12 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 	const now = os.clock()
 
 	-- Subtract fire rate by epsilon to fix floating point precision error with event frame timing
-	if now - gunState.lastFired < gunStats.fireRate - FIRE_RATE_EPSILON then
+	if now - gunState.lastFired < config.fireRate - FIRE_RATE_EPSILON then
 		logger:warn(`Player {player.Name} attempted to exceed weapon fire rate.`)
 		return
 	end
 
-	const mode = gunData.normalizeMode(gunStats.modes[gunState.mode])
+	const mode = gunData.normalizeMode(config.modes[gunState.mode])
 	if not mode then return end
 
 	local shots = math.min(mode.shots, gunState.ammo.current)
@@ -150,7 +150,7 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 			gunType = data.gunType,
 			origin = data.origin,
 			timestamp = data.timestamp,
-		}, gunData.normalizeGunData(gunStats))
+		}, gunData.normalizeGunData(config))
 
 		-- Avoid waiting on the final shot of the burst
 		if i < shots and mode.interval then task.wait(mode.interval) end
@@ -178,9 +178,9 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 	})
 end
 
-function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFireData, weaponData: gunData.GunData)
+function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFireData, config: gunData.GunData)
 	local position = data.origin
-	local velocity = data.direction * weaponData.bulletVelocity
+	local velocity = data.direction * config.bulletVelocity
 	local traveledDistance = 0
 
 	local connection: RBXScriptConnection
@@ -193,7 +193,7 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 		if traveledDistance > MAX_TRAVELED_DISTANCE then
 			connection:Disconnect()
 			return
-		elseif traveledDistance >= weaponData.range then
+		elseif traveledDistance >= config.range then
 			velocity += GRAVITY * delta
 		end
 
@@ -206,11 +206,9 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 			const humanoid = character and character:FindFirstChildOfClass('Humanoid')
 
 			if character and humanoid and humanoid.Health > 0 then
-				local headshotMultiplier = weaponData.modifiers.headshotMultiplier or 1
+				local headshotMultiplier = config.modifiers.headshotMultiplier or 1
 
-				local damage = if result.Instance.Name == 'Head'
-					then weaponData.damage * headshotMultiplier
-					else weaponData.damage
+				local damage = if result.Instance.Name == 'Head' then config.damage * headshotMultiplier else config.damage
 
 				humanoid:TakeDamage(damage)
 				if humanoid.Health <= 0 then net.KilledPlayer.Fire(player, character.Name) end
@@ -260,16 +258,16 @@ end
 
 function CombatProvider.registerPlayerGun(self: self, player: Player, gunType: Gun, gunInstance: Tool): ()
 	local state = self.weaponState[player.UserId]
-	local gunData = gunData.getDataFromName(gunType)
+	local config = gunData.normalizeGunData(gunData.getDataFromName(gunType))
 
 	if not state or not gunData then return end
 
 	state[gunInstance] = {
 		gunType = gunType,
-		mode = gunData.defaultMode,
+		mode = config.defaultMode,
 		ammo = {
-			current = gunData.ammoCapacity,
-			max = gunData.ammoCapacity,
+			current = config.ammoCapacity,
+			max = config.ammoCapacity,
 		},
 		lastFired = 0,
 	}
