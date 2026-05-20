@@ -182,7 +182,7 @@ local function SideButton(props: SideButtonProps)
 end
 
 local function HUD()
-	const data = useAtom(meta.playerData)
+	const data = useAtom(atoms.playerData)
 	const mousePos = source(Vector2.new(mouse.X, mouse.Y))
 	const hitmarker = source(false)
 
