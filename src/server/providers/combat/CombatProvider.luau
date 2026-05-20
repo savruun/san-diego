@@ -217,7 +217,7 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 					local accessory = if result.Instance:IsA('Accessory')
 						then result.Instance
 						else result.Instance.Parent :: Accessory
-					isHeadshot = table.find(HEAD_ACCESSORIES, accessory.AccessoryType) ~= nil
+					isHeadshot = table.find(HEADSHOT_ACCESSORIES, accessory.AccessoryType) ~= nil
 				end
 
 				local headshotMultiplier = config.modifiers.headshotMultiplier or 1
