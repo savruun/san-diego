@@ -42,8 +42,6 @@ type ActiveBullet = {
 	weaponData: gunData.GunData,
 }
 
-const defaultGunData = gunData.default()
-
 -- The max distance in studs in which the player can fire away from themselves (20 should account for latency)
 const MAX_DISTANCE_DIFF = 20
 const GRAVITY = constants.GRAVITY
@@ -152,7 +150,7 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 			gunType = data.gunType,
 			origin = data.origin,
 			timestamp = data.timestamp,
-		}, gunStats)
+		}, gunData.normalizeGunData(gunStats))
 
 		-- Avoid waiting on the final shot of the burst
 		if i < shots and mode.interval then task.wait(mode.interval) end
@@ -208,7 +206,13 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 			const humanoid = character and character:FindFirstChildOfClass('Humanoid')
 
 			if character and humanoid and humanoid.Health > 0 then
-				humanoid:TakeDamage(weaponData.damage)
+				local headshotMultiplier = weaponData.modifiers.headshotMultiplier or 1
+
+				local damage = if result.Instance.Name == 'Head'
+					then weaponData.damage * headshotMultiplier
+					else weaponData.damage
+
+				humanoid:TakeDamage(damage)
 				if humanoid.Health <= 0 then net.KilledPlayer.Fire(player, character.Name) end
 			end
 
