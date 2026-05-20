@@ -96,7 +96,9 @@ local function getDataFromName(gunType: keyof<typeof(gunData)> | string): GunDat
 
 local function default(): GunData return gunData.Default end
 
-local function normalizeMode(mode: GunFireModeData)
+local function normalizeMode(mode: GunFireModeData?)
+	mode = mode or {}
+
 	return {
 		shots = mode.shots or 1,
 		interval = mode.interval or 0,
@@ -105,7 +107,8 @@ local function normalizeMode(mode: GunFireModeData)
 	}
 end
 
-local function normalizeGunData(data: GunData)
+local function normalizeGunData(data: GunData?)
+	data = data or {}
 	const defaultData = default()
 
 	local gunData = {
