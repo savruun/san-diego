@@ -202,7 +202,7 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 
 		raycastParams.ExcludeInstances = { player.Character :: Model }
 
-		local result = workspace:Raycast(position, displacement, raycastParams)
+		const result = workspace:Raycast(position, displacement, raycastParams)
 
 		if result and result.Instance then
 			const instance = result.Instance :: Instance
@@ -214,15 +214,15 @@ function CombatProvider.bulletSimulation(self: self, player: Player, data: GunFi
 				local isHeadshot = instance.Name == 'Head'
 
 				if instance:IsA('Accessory') or (instance.Parent and instance.Parent:IsA('Accessory')) then
-					local accessory = if result.Instance:IsA('Accessory')
+					const accessory = if result.Instance:IsA('Accessory')
 						then result.Instance
 						else result.Instance.Parent :: Accessory
 					isHeadshot = table.find(HEADSHOT_ACCESSORIES, accessory.AccessoryType) ~= nil
 				end
 
-				local headshotMultiplier = config.modifiers.headshotMultiplier or 1
-				local damage = if isHeadshot then config.damage * headshotMultiplier else config.damage
-				print(result.Instance.Name)
+				const headshotMultiplier = config.modifiers.headshotMultiplier or 1
+				const damage = if isHeadshot then config.damage * headshotMultiplier else config.damage
+
 				humanoid:TakeDamage(damage)
 				if humanoid.Health <= 0 then net.KilledPlayer.Fire(player, character.Name) end
 			end
