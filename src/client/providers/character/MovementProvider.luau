@@ -21,12 +21,11 @@ const MovementProvider = {
 	humanoid = nil :: Humanoid?,
 }
 
-MovementProvider.CharacterProvider = dependency.use(require('./CharacterProvider'))
+MovementProvider.CharacterProvider = dependency.use(require('@csingletons/character/CharacterProvider'))
 
 function MovementProvider.start(self: self): ()
-	self:_attachToCharacter()
-	self:_attachInput()
-	print('started')
+	self:__attachToCharacter()
+	self:__attachInput()
 end
 
 --[[
@@ -107,12 +106,12 @@ end
 --[[
   Attaches listeners for when the character spawns
 ]]
-function MovementProvider._attachToCharacter(self: self): ()
+function MovementProvider.__attachToCharacter(self: self): ()
 	self.character = self.CharacterProvider:getCharacter()
 	self.humanoid = self.CharacterProvider:getHumanoid()
 
 	-- When character is spawned set properties
-	self.CharacterProvider.spawned:Connect(function(character, humanoid): ()
+	self.CharacterProvider.Spawned:Connect(function(character, humanoid): ()
 		self.character = character
 		self.humanoid = humanoid
 
@@ -123,7 +122,7 @@ end
 --[[
   Attaches appropriate listeners to input
 ]]
-function MovementProvider._attachInput(self: self): ()
+function MovementProvider.__attachInput(self: self): ()
 	EzInput.context('player')
 		:action('sprint')
 		:bind(Enum.KeyCode.LeftShift)

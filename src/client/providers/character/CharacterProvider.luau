@@ -8,7 +8,11 @@ const Signal = require('@shared/lib/Signal')
 const CharacterProvider = {
 	character = nil :: Model?,
 	humanoid = nil :: Humanoid?,
-	spawned = Signal.new<<(Model, Humanoid)>>(),
+
+	--[[
+    Fires when the Local Character spawns.
+  ]]
+	Spawned = Signal.new<<(Model, Humanoid)>>(),
 }
 
 function CharacterProvider.start(self: self): ()
@@ -16,9 +20,10 @@ function CharacterProvider.start(self: self): ()
 	self.humanoid = self.character and self.character:FindFirstChildOfClass('Humanoid')
 
 	Player.CharacterAdded:Connect(function(char): ()
-		self.character = char
+		self.character = char :: Model
 		self.humanoid = char:WaitForChild('Humanoid') :: Humanoid
-		self.spawned:Fire(self.character :: Model, self.humanoid :: Humanoid)
+
+		self.Spawned:Fire(self.character :: Model, self.humanoid :: Humanoid)
 	end)
 end
 

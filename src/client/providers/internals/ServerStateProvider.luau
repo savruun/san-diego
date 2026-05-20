@@ -2,22 +2,23 @@ const net = require('@client/net')
 const GunComponent = require('@client/components/Gun')
 
 const playerTypes = require('@types/player')
-const meta = require('@client/meta')
+const future = require('@pkg/future')
+const atoms = require('@shared/atoms')
 
 const ServerStateProvider = {}
 
 function ServerStateProvider.start(self: self)
-	self:connectListeners()
+	self:__connectListeners()
 
 	-- Fetch the current player data
-	const dataFuture = net.GetPersistentData:Invoke()
+	const dataFuture = net.GetPersistentData:Invoke() :: future.Future<boolean, playerTypes.SafePlayerData>
 	const success, data = dataFuture:Await()
 
 	-- If successful fetch, set player data
-	if success then meta.playerData(data) end
+	if success then atoms.playerData(data) end
 end
 
-function ServerStateProvider.connectListeners(self: self)
+function ServerStateProvider.__connectListeners(self: self)
 	-- When the server detects a gun state desync itll fire this to resync data
 	net.SyncGunState.On(function(stateData)
 		const gunInstance = GunComponent:get(stateData.instance)
@@ -34,7 +35,7 @@ function ServerStateProvider.connectListeners(self: self)
 	end)
 
 	-- Update player data when told by the server
-	net.SyncPlayerData.On(function(data) meta.playerData(data) end)
+	net.SyncPlayerData.On(function(data) atoms.playerData(data) end)
 end
 
 export type self = typeof(ServerStateProvider)
