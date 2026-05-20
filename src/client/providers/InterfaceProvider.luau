@@ -10,6 +10,7 @@ const atom = charm.atom
 
 const paths = require('@shared/paths')
 const iconIds = require('@shared/data/iconIds')
+const safeChatOptions = require('@shared/data/safeChatOptions')
 
 const App = require('@ui/components/App')
 
@@ -20,6 +21,16 @@ const InterfaceProvider = {
 	__rootCleanup = function() end,
 	page = atom<<string?>>(),
 	mountedComponents = atom<<{ string }>>({}),
+
+	icons = {
+		ranks = icon.new(),
+		safechat = icon.new(),
+		settings = icon.new(),
+
+		dropdowns = {
+			safechat = {} :: { icon.Icon },
+		},
+	},
 }
 
 function InterfaceProvider.start(self: self): ()
@@ -76,8 +87,20 @@ function InterfaceProvider.__setDefaultValues(self: self)
 end
 
 function InterfaceProvider.__mountTopbar(self: self)
-	icon.new():setImage(iconIds.topbar.ranks):setLabel('Ranks')
-	icon.new():setImage(iconIds.topbar.setting):setLabel('Settings')
+	self.icons.ranks:setImage(iconIds.topbar.ranks):setLabel('Ranks')
+	self.icons.settings:setImage(iconIds.topbar.setting):setLabel('Settings')
+
+	for _, safeChatOption in safeChatOptions.armed do
+		table.insert(
+			self.icons.dropdowns.safechat,
+			icon.new():setLabel(safeChatOption):oneClick(true):bindEvent('selected', function(...)
+				self.icons.safechat:deselect()
+				print(safeChatOption)
+			end)
+		)
+	end
+
+	self.icons.safechat:setOrder(1):setImage(iconIds.topbar.ranks):setDropdown(self.icons.dropdowns.safechat)
 end
 
 export type self = typeof(InterfaceProvider)
