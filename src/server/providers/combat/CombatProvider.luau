@@ -49,14 +49,7 @@ const MAX_TRAVELED_DISTANCE = 10000
 const FIRE_RATE_EPSILON = 0.01
 
 -- The accessories which if hit will count as a headshot
-const HEAD_ACCESSORIES = {
-	Enum.AccessoryType.Hair,
-	Enum.AccessoryType.Face,
-	Enum.AccessoryType.Hat,
-	Enum.AccessoryType.Eyebrow,
-	Enum.AccessoryType.Eyelash,
-	Enum.AccessoryType.Neck,
-}
+const HEADSHOT_ACCESSORIES = constants.HEADSHOT_ACCESSORIES
 
 local raycastParams = RaycastParams.new()
 raycastParams.FilterType = Enum.RaycastFilterType.Exclude
