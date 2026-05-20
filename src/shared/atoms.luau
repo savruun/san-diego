@@ -1,4 +1,5 @@
 const charm = require('@pkg/charm')
+const playerTypes = require('@types/player')
 
 type AmmoData = {
 	current: number,
@@ -11,6 +12,8 @@ const atoms = {
 		mode = charm.atom<<string>>(''),
 		name = charm.atom<<string>>(''),
 	},
+
+	playerData = charm.atom<<playerTypes.SafePlayerData>>(),
 }
 
 return atoms
