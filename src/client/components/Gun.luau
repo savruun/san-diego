@@ -63,8 +63,8 @@ export type self = setmetatable<GunProperties, typeof(Gun)>
 function Gun.init(self: self): ()
 	self.trove:AttachToInstance(self.instance)
 
-	self.trove:Add(self.instance.Equipped:Connect(function() self:_onEquipped() end))
-	self.trove:Add(self.instance.Unequipped:Connect(function() self:_onUnequipped() end))
+	self.trove:Add(self.instance.Equipped:Connect(function() self:__onEquipped() end))
+	self.trove:Add(self.instance.Unequipped:Connect(function() self:__onUnequipped() end))
 
 	-- Cache modes in order
 
@@ -101,7 +101,7 @@ function Gun.pullTrigger(self: self): ()
 	self.ammo(nextAmmo)
 
 	-- Update ui for ammo purposes
-	self:_updateUiAtoms()
+	self:__updateUiAtoms()
 
 	local origin = self.tip.WorldPosition
 	local directions = table.create<<Vector3>>(shots) -- Create a table with the length of the number of shots to take
@@ -188,6 +188,8 @@ function Gun.reload(self: self): ()
 		mode = self.mode(),
 		instance = self.instance,
 	})
+
+	self:__updateUiAtoms()
 end
 
 --[[
@@ -210,7 +212,7 @@ function Gun.switchMode(self: self)
 	local nextMode = self.modeOrder[currentIndex + 1] or self.modeOrder[1]
 	self.mode(nextMode)
 
-	self:_updateUiAtoms()
+	self:__updateUiAtoms()
 
 	net.SwitchGunMode.Fire({
 		gunType = self.instance.Name,
@@ -218,7 +220,7 @@ function Gun.switchMode(self: self)
 	})
 end
 
-function Gun._updateUiAtoms(self: self)
+function Gun.__updateUiAtoms(self: self)
 	atoms.gun.ammo({ current = self.ammo(), max = self.data.ammoCapacity })
 	atoms.gun.mode(self.mode())
 	atoms.gun.name(self.instance.Name)
@@ -226,21 +228,21 @@ end
 --[[
   Runs on equipped.
 ]]
-function Gun._onEquipped(self: self): ()
+function Gun.__onEquipped(self: self): ()
 	self.equippedTrove = self.trove:Extend()
 	self.input = ezinput.context('gun')
 	self.state = GunStateEnum.Idle
 
 	mouse.Icon = cursorIds.Default
 
-	self:_attachInput()
-	self:_updateUiAtoms()
+	self:__attachInput()
+	self:__updateUiAtoms()
 end
 
 --[[
   Runs on unequipped.
 ]]
-function Gun._onUnequipped(self: self): ()
+function Gun.__onUnequipped(self: self): ()
 	if self.equippedTrove then
 		self.equippedTrove:Clean()
 		self.equippedTrove = nil
@@ -256,7 +258,7 @@ end
 --[[
   Attaches all inputs to their corresponding methods.
 ]]
-function Gun._attachInput(self: self): ()
+function Gun.__attachInput(self: self): ()
 	local input = self.input
 	local equippedTrove = self.equippedTrove
 
