@@ -120,6 +120,7 @@ local function GunInfo()
 			position = UDim2.fromScale(0.5, 0.75),
 			size = UDim2.fromScale(0.9, 0.2),
 			anchor = Vector2.new(0.5),
+			progress = ammo,
 		},
 	}
 end
