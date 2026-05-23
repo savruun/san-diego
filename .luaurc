@@ -4,6 +4,8 @@
     "csingletons": "src/client/providers",
     "ssingletons": "src/server/providers",
     "lib": "src/shared/lib",
+    "data": "src/shared/data",
+    "enums": "src/shared/enums",
     "pkg": "roblox_packages",
     "spkg": "roblox_server_packages",
     "client": "src/client",
