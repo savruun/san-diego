@@ -12,6 +12,8 @@ local requirePatterns: { { string } } = {
 	{ 'require%(([\'"`])@ssingletons/([^\'"`]+)[\'"`]%)', 'require(\'@game/ServerScriptService/server/providers/%2\')' },
 	{ 'require%(([\'"`])@csingletons/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/client/providers/%2\')' },
 	{ 'require%(([\'"`])@lib/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/shared/lib/%2\')' },
+	{ 'require%(([\'"`])@data/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/shared/data/%2\')' },
+	{ 'require%(([\'"`])@enums/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/shared/enums/%2\')' },
 	{ 'require%(([\'"`])@client/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/client/%2\')' },
 	{ 'require%(([\'"`])@server/([^\'"`]+)[\'"`]%)', 'require(\'@game/ServerScriptService/server/%2\')' },
 	{ 'require%(([\'"`])@ui/([^\'"`]+)[\'"`]%)', 'require(\'@game/ReplicatedStorage/client/interface/%2\')' },
