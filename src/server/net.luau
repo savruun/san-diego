@@ -168,6 +168,7 @@ Queue.Reliable[2] = table.create(256)
 Queue.Reliable[7] = table.create(256)
 Queue.Reliable[8] = table.create(256)
 Queue.Reliable[9] = table.create(256)
+Queue.Reliable[10] = table.create(256)
 export type Map<K,V> = {[K]: V}
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
@@ -334,6 +335,14 @@ function SerdesFunctions.ReadEVENT_SyncInventoryState(): ({ string })
 	return Value
 end
 
+function SerdesFunctions.ReadEVENT_RequestTeamChange(): (string)
+	-- Read BLOCK: 2 bytes
+	local BLOCK_START = Read(2)
+	local Length = buffer.readu16(RecieveBuffer, BLOCK_START + 0)
+	local Value = buffer.readstring(RecieveBuffer, Read(Length), Length)
+	return Value
+end
+
 function SerdesFunctions.ReadFUNCTION_DATA_GetPersistentData(): (nil)
 	return nil
 end
@@ -341,7 +350,7 @@ end
 function SerdesFunctions.WriteFUNCTION_RETURN_GetPersistentData(Value: any, InvocationIdentifier: number): ()
 	-- Allocate BLOCK: 3 bytes
 	local BLOCK_START = Allocate(3)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 9)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 10)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 	buffer.writeu8(SendBuffer, BLOCK_START + 2, 1)
 	table.insert(SendInstances, if Value == nil then Null else Value)
@@ -387,6 +396,9 @@ if not RunService:IsRunning() then
 		On = NOOP
 	},
 	SyncInventoryState = {
+		On = NOOP
+	},
+	RequestTeamChange = {
 		On = NOOP
 	},
 	GetPersistentData = {
@@ -505,17 +517,27 @@ Reliable.OnServerEvent:Connect(function(Player: Player, Buffer: buffer, Instance
 				table.insert(Queue.Reliable[8], {Player, Value} :: {any})
 			end
 		elseif Index == 9 then
+			local Value: string = SerdesFunctions.ReadEVENT_RequestTeamChange()
+			if Events.Reliable[9] ~= nil then
+				task.spawn(Events.Reliable[9], Player, Value)
+			else
+				if #Queue.Reliable[9] > 256 then
+					warn("[Blink]: Event queue of \"RequestTeamChange\" exceeded 256, did you forget to implement a listener?")
+				end
+				table.insert(Queue.Reliable[9], {Player, Value} :: {any})
+			end
+		elseif Index == 10 then
 			-- Read BLOCK: 1 bytes
 			local BLOCK_START = Read(1)
 			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
 			local Value: nil = SerdesFunctions.ReadFUNCTION_DATA_GetPersistentData()
-			if Events.Reliable[9] ~= nil then
-				task.spawn(Events.Reliable[9], Player, Value, InvocationIdentifier)
+			if Events.Reliable[10] ~= nil then
+				task.spawn(Events.Reliable[10], Player, Value, InvocationIdentifier)
 			else
-				if #Queue.Reliable[9] > 256 then
+				if #Queue.Reliable[10] > 256 then
 					warn("[Blink]: Event queue of \"GetPersistentData\" exceeded 256, did you forget to implement a listener?")
 				end
-				table.insert(Queue.Reliable[9], {Player, Value, InvocationIdentifier} :: {any})
+				table.insert(Queue.Reliable[10], {Player, Value, InvocationIdentifier} :: {any})
 			end
 		end
 	end
@@ -796,9 +818,23 @@ local Returns = table.freeze({
 			end
 		end
 	},
+	RequestTeamChange = {
+		On = function(Listener: (Player: Player, Value: string) -> ()): () -> ()
+			Events.Reliable[9] = Listener
+			for Index, Arguments in Queue.Reliable[9] do
+				task.spawn(Listener, table.unpack(Arguments))
+			end
+			Queue.Reliable[9] = {}
+			return function (): ()
+				if Events.Reliable[9] == Listener then
+					Events.Reliable[9] = nil
+				end
+			end
+		end
+	},
 	GetPersistentData = {
 		On = function(Listener: (Player, nil) -> (any)): ()
-			Events.Reliable[9] = function(Player: Player, Value: nil, InvocationIdentifier: number): ()
+			Events.Reliable[10] = function(Player: Player, Value: nil, InvocationIdentifier: number): ()
 				local ReturnValue: any;
 				local Success, Error = pcall(function ()
 					ReturnValue = Listener(Player, Value)
@@ -806,7 +842,7 @@ local Returns = table.freeze({
 				Load(PlayersMap[Player])
 				if Success ~= true then
 					local Position = Allocate(3)
-					buffer.writeu8(SendBuffer, Position, 9)
+					buffer.writeu8(SendBuffer, Position, 10)
 					buffer.writeu8(SendBuffer, Position + 1, InvocationIdentifier)
 					buffer.writeu8(SendBuffer, Position + 2, 0)
 					warn(`"GetPersistentData" encountered an error, {Error}`)
@@ -816,10 +852,10 @@ local Returns = table.freeze({
 				PlayersMap[Player] = Save()
 			end
 			task.spawn(function (): ()
-				local EventQueue = Queue.Reliable[9] or {}
-				Queue.Reliable[9] = nil
+				local EventQueue = Queue.Reliable[10] or {}
+				Queue.Reliable[10] = nil
 				for Index, Arguments in EventQueue do
-					Events.Reliable[9](table.unpack(Arguments))
+					Events.Reliable[10](table.unpack(Arguments))
 				end
 			end)
 		end

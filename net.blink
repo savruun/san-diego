@@ -95,6 +95,13 @@ event SyncInventoryState {
   Data: string[]
 }
 
+event RequestTeamChange {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: string
+}
+
 function GetPersistentData {
   Yield: Future,
   Return: unknown

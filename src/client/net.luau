@@ -165,7 +165,7 @@ Queue.Reliable[3] = table.create(256)
 Queue.Reliable[4] = table.create(256)
 Queue.Reliable[5] = table.create(256)
 Queue.Reliable[6] = table.create(256)
-Queue.Reliable[9] = table.create(256)
+Queue.Reliable[10] = table.create(256)
 export type Map<K,V> = {[K]: V}
 export type GunFireData = { ammo: number, origin: Vector3, directions: { Vector3 }, timestamp: number, gunType: string }
 export type BulletRenderData = { origin: Instance, directions: { Vector3 }, position: Vector3, gunType: string, mode: string }
@@ -331,10 +331,20 @@ function SerdesFunctions.WriteEVENT_SyncInventoryState(Value: { string }): ()
 	-- END ARRAY
 end
 
+function SerdesFunctions.WriteEVENT_RequestTeamChange(Value: string): ()
+	-- Allocate BLOCK: 3 bytes
+	local BLOCK_START = Allocate(3)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 9)
+	local Length = #Value
+	buffer.writeu16(SendBuffer, BLOCK_START + 1, Length)
+	Allocate(Length)
+	buffer.writestring(SendBuffer, SendOffset, Value, Length)
+end
+
 function SerdesFunctions.WriteFUNCTION_DATA_GetPersistentData(Value: nil, InvocationIdentifier: number): ()
 	-- Allocate BLOCK: 2 bytes
 	local BLOCK_START = Allocate(2)
-	buffer.writeu8(SendBuffer, BLOCK_START + 0, 9)
+	buffer.writeu8(SendBuffer, BLOCK_START + 0, 10)
 	buffer.writeu8(SendBuffer, BLOCK_START + 1, InvocationIdentifier)
 end
 
@@ -378,6 +388,9 @@ if not RunService:IsRunning() then
 		Fire = NOOP
 	},
 	SyncInventoryState = {
+		Fire = NOOP
+	},
+	RequestTeamChange = {
 		Fire = NOOP
 	},
 	GetPersistentData = {
@@ -465,7 +478,7 @@ Reliable.OnClientEvent:Connect(function(Buffer: buffer, Instances: {Instance})
 				end
 				table.insert(Queue.Reliable[6], {Value} :: {any})
 			end
-		elseif Index == 9 then
+		elseif Index == 10 then
 			-- Read BLOCK: 1 bytes
 			local BLOCK_START = Read(1)
 			local InvocationIdentifier = buffer.readu8(RecieveBuffer, BLOCK_START + 0)
@@ -580,6 +593,11 @@ local Returns = table.freeze({
 	SyncInventoryState = {
 		Fire = function(Value: { string }): ()
 			SerdesFunctions.WriteEVENT_SyncInventoryState(Value)
+		end
+	},
+	RequestTeamChange = {
+		Fire = function(Value: string): ()
+			SerdesFunctions.WriteEVENT_RequestTeamChange(Value)
 		end
 	},
 	GetPersistentData = {
