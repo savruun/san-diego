@@ -2,6 +2,8 @@ const ServerStorage = game:GetService('ServerStorage')
 const PlayerUtility = require('@shared/lib/playerUtility')
 const Dependency = require('@pkg/quill_dependencies')
 
+const net = require('@server/net')
+
 const Tools = ServerStorage.assets.tools
 const Guns = Tools.guns
 
@@ -15,6 +17,10 @@ function InventoryProvider.start(self: self)
 	PlayerUtility:forEachPlayer(function(player)
 		player.CharacterAdded:Connect(function(_character) self:givePlayerTool(player, 'Gun', 'Pistol') end)
 	end)
+
+	net.SyncInventoryState.On(
+		function(player, inventory) print(`{player.Name} attempted to sync inventory state`, inventory) end
+	)
 end
 
 function InventoryProvider.givePlayerTool(self: self, player: Player, toolType: ToolType, toolName: string)
