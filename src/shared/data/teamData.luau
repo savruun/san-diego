@@ -1,26 +1,33 @@
 const TeamEnum = require('@enums/Team')
 const SafeChatGroupEnum = require('@enums/SafeChatGroup')
 
-const teamData = {
+export type TeamData = {
+	name: string,
+	safeChatGroup: string,
+	color: Color3,
+	loadout: { string },
+}
+
+const teamData: { [string]: TeamData } = {
 	[TeamEnum.FBI] = {
-		Name = 'Federal Bureau of Investigation',
-		SafeChatGroup = SafeChatGroupEnum.Armed,
-		Color = Color3.new(),
-		Loadout = {},
+		name = 'Federal Bureau of Investigation',
+		safeChatGroup = SafeChatGroupEnum.Armed,
+		color = Color3.new(),
+		loadout = {},
 	},
 
 	[TeamEnum.HLS] = {
-		Name = 'Homeland Security',
-		SafeChatGroup = SafeChatGroupEnum.Armed,
-		Color = Color3.new(),
-		Loadout = {},
+		name = 'Homeland Security',
+		safeChatGroup = SafeChatGroupEnum.Armed,
+		color = Color3.new(0, 0.443137, 0.780392),
+		loadout = {},
 	},
 
 	[TeamEnum.Civilian] = {
-		Name = 'Civilians',
-		SafeChatGroup = SafeChatGroupEnum.Unarmed,
-		Color = Color3.new(),
-		Loadout = {},
+		name = 'Civilians',
+		safeChatGroup = SafeChatGroupEnum.Unarmed,
+		color = Color3.new(0.764706, 1, 0.807843),
+		loadout = {},
 	},
 }
 
