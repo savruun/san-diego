@@ -60,6 +60,8 @@ const CombatProvider = {
 	activeBullets = {} :: { ActiveBullet },
 }
 
+CombatProvider.AnticheatProvider = Dependency.use(require('@ssingletons/AnticheatProvider'))
+
 function CombatProvider.start(self: self)
 	Net.FireGun.On(function(player, data) self:gunFired(player, data) end)
 
@@ -116,6 +118,13 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 
 	if gunState.ammo.current <= 0 then
 		logger:warn(`Player {player.Name} attempted to fire {data.gunType} without ammo.`)
+
+		self.AnticheatProvider:addPlayerTrigger(player, {
+			expiration = 60,
+			reason = `Attempted to fire {data.gunType} without ammo.`,
+			timestamp = os.clock(),
+		})
+
 		return
 	end
 
@@ -124,6 +133,13 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 	-- Subtract fire rate by epsilon to fix floating point precision error with event frame timing
 	if now - gunState.lastFired < config.fireRate - FIRE_RATE_EPSILON then
 		logger:warn(`Player {player.Name} attempted to exceed weapon fire rate.`)
+
+		self.AnticheatProvider:addPlayerTrigger(player, {
+			expiration = 60,
+			reason = `Attempted to exceed {data.gunType}'s firerate of {config.fireRate}.`,
+			timestamp = os.clock(),
+		})
+
 		return
 	end
 
@@ -143,6 +159,13 @@ function CombatProvider.gunFired(self: self, player: Player, data: Net.GunFireDa
 
 		if not direction then
 			logger:warn(`Missing direction at index {i}`)
+
+			self.AnticheatProvider:addPlayerTrigger(player, {
+				expiration = 20,
+				reason = 'Malformed shot array.',
+				timestamp = os.clock(),
+			})
+
 			continue
 		end
 
