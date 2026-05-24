@@ -88,6 +88,13 @@ event SaySafeChatOption {
   Data: i32
 }
 
+event SyncInventoryState {
+  Type: Reliable,
+  From: Client,
+  Call: SingleAsync,
+  Data: string[]
+}
+
 function GetPersistentData {
   Yield: Future,
   Return: unknown
