@@ -11,6 +11,7 @@ const net = require('@server/net')
 
 const TeamProvider = {
 	TeamChanged = Signal.new<<Player, string>>(),
+	playerTeamCount = {} :: { [string]: number },
 }
 
 TeamProvider.CharacterProvider = Dependency.use(require('@ssingletons/player/CharacterProvider'))
@@ -23,11 +24,30 @@ function TeamProvider.start(self: self)
 		-- Respawn them
 		self.CharacterProvider:respawn(player)
 	end)
+
+	-- Initialize all team counts
+	for teamName, _ in teamData do
+		self.playerTeamCount[teamName] = 0
+	end
 end
 
 function TeamProvider.setPlayerTeam(self: self, player: Player, teamName: keyof<typeof(teamData)>): ()
+	const config = teamData[teamName]
+	if not config then return end
+
+	-- Do not allow more players on the team than allowed
+	if config.maxPlayers and self.playerTeamCount[teamName] >= config.maxPlayers then return end
+
+	-- Decrement the last team's count
+	if player.Team then
+		self.playerTeamCount[player.Team.Name] -= 1
+	end
+
 	const team = Teams:FindFirstChild(teamName)
 	if not team then return end
+
+	-- Increment the new team's count
+	self.playerTeamCount[team.Name] += 1
 
 	player.Team = team
 	self.TeamChanged:Fire(player, teamName)
