@@ -7,6 +7,7 @@ export type TeamData = {
 	acronym: string?,
 	maxPlayers: number?,
 	color: Color3,
+	order: { gui: number?, lb: number? }?,
 	loadout: { string },
 }
 
@@ -38,11 +39,28 @@ const teamData: { [string]: TeamData } = {
 		loadout = {},
 	},
 
+	[TeamEnum.USA] = {
+		name = 'US Army',
+		acronym = 'US:A',
+		color = Color3.new(),
+		loadout = {},
+		maxPlayers = 10,
+	},
+
+	[TeamEnum.ST] = {
+		name = 'State Police',
+		acronym = 'ST',
+		color = Color3.new(),
+		loadout = {},
+		maxPlayers = 10,
+	},
+
 	[TeamEnum.Civilian] = {
 		name = 'Civilians',
 		safeChatGroup = SafeChatGroupEnum.Unarmed,
 		color = Color3.new(0.764706, 1, 0.807843),
 		loadout = {},
+		order = { gui = -1 },
 	},
 }
 
