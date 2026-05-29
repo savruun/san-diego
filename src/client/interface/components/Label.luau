@@ -11,9 +11,11 @@ type Props = {
 	size: UDim2?,
 	font: Enum.Font?,
 	scaled: boolean?,
+	anchor: Vector2?,
 
 	button: boolean?,
 	onClick: () -> ()?,
+	xAlignment: Enum.TextXAlignment,
 
 	[number]: GuiObject,
 }
@@ -30,7 +32,8 @@ local function Label(props: Props): TextButton | TextLabel
 		Font = props.font or Enum.Font.Arimo,
 		Text = props.text,
 		TextScaled = props.scaled,
-
+		AnchorPoint = props.anchor or Vector2.zero,
+		TextXAlignment = props.xAlignment,
 		Children(props),
 	}
 end
