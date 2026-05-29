@@ -23,6 +23,7 @@ type Props = {
 	strokeTransparency: number?,
 	strokeWidth: number?,
 	aspectRatio: number?,
+	onClick: (() -> ())?,
 
 	[number]: GuiObject,
 }
@@ -42,6 +43,7 @@ local function GradientButton(props: Props)
 	return create 'TextButton' {
 		Position = props.position,
 		Size = sizeSpring,
+		Activated = props.onClick,
 
 		MouseEnter = function()
 			hovering(true)
